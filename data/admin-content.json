@@ -1,0 +1,44 @@
+{
+  "hero": {
+    "eyebrow": "Nuaim Razak & Partners",
+    "title": "Khidmat\nGuaman Syarie\nYang Profesional,\nTelus & Berpengalaman",
+    "paragraph": "Nuaim Razak & Partners menyediakan khidmat guaman Syarie dan nasihat perundangan Syariah bagi membantu individu dan keluarga menyelesaikan isu berkaitan perkahwinan, kekeluargaan Islam, faraid, hibah, wasiat, pengantaraan keluarga dan jenayah Syariah.",
+    "images": [
+      {
+        "src": "/images/founders.png",
+        "alt": "Pasukan Nuaim Razak & Partners",
+        "label": "Rakan Kongsi"
+      },
+      {
+        "src": "/images/nuaim-majemi.jpeg",
+        "alt": "Muhammad Nuaim Bin Majemi",
+        "label": "Muhammad Nuaim Bin Majemi"
+      },
+      {
+        "src": "/images/abdul-razak.jpeg",
+        "alt": "Abdul Razak Bin Mohamad Rawi",
+        "label": "Abdul Razak Bin Mohamad Rawi"
+      }
+    ]
+  },
+  "certificates": {
+    "Muhammad Nuaim Bin Majemi": [
+      {
+        "negeri": "Wilayah Persekutuan",
+        "title": "Perakuan Amalan Tahun 2025",
+        "href": "/certificates/nuaim-wilayah-persekutuan-2025.jpeg",
+        "type": "image"
+      }
+    ]
+  },
+  "lawyers": {
+    "Dr. Yusri Bin Mohamad": {
+      "email": ""
+    }
+  },
+  "services": {},
+  "customLawyers": [],
+  "hiddenLawyers": [],
+  "customServices": [],
+  "hiddenServices": []
+}
