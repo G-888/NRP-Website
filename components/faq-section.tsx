@@ -1,7 +1,7 @@
-import { faqs } from "@/lib/site-data";
 import { SectionHeading } from "@/components/section-heading";
+import type { AdminFaq } from "@/lib/admin-content";
 
-export function FaqSection() {
+export function FaqSection({ faqs }: { faqs: AdminFaq[] }) {
   return (
     <section className="section">
       <SectionHeading

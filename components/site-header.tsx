@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 import { Menu, MessageCircle, X } from "lucide-react";
 import { useState } from "react";
 import { ButtonLink } from "@/components/button-link";
-import { firm, navigation } from "@/lib/site-data";
+import type { getManagedFirm } from "@/lib/managed-content";
+import { navigation } from "@/lib/site-data";
 
-export function SiteHeader() {
+export function SiteHeader({ firm }: { firm: ReturnType<typeof getManagedFirm> }) {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
 

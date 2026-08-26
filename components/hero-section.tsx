@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import type { AdminContent } from "@/lib/admin-content";
-import { firm } from "@/lib/site-data";
+import type { getManagedFirm } from "@/lib/managed-content";
 
 const trustItems = [
   {
@@ -37,9 +37,10 @@ const trustItems = [
 
 type HeroSectionProps = {
   content: AdminContent["hero"];
+  firm: ReturnType<typeof getManagedFirm>;
 };
 
-export function HeroSection({ content }: HeroSectionProps) {
+export function HeroSection({ content, firm }: HeroSectionProps) {
   const headline = content.title.split("\n").filter(Boolean);
   const heroImage = content.images[0];
 

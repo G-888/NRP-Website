@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { BlogFilter } from "@/components/blog-filter";
 import { PageHero } from "@/components/page-hero";
+import { getAdminContent } from "@/lib/admin-content";
 
 export const metadata: Metadata = {
   title: "Artikel",
@@ -8,16 +9,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/artikel" }
 };
 
-export default function ArticlesPage() {
+export default async function ArticlesPage() {
+  const adminContent = await getAdminContent();
   return (
     <>
-      <PageHero
-        eyebrow="Artikel"
-        title="Catatan Blog Dan Rujukan"
-        description="Himpunan perkongsian berkaitan keluarga, masyarakat, Islam dan isu undang-undang Syariah."
-      />
+      <PageHero {...adminContent.pageHeroes.articles} />
       <section className="section">
-        <BlogFilter />
+        <BlogFilter blogPosts={adminContent.blogPosts} />
       </section>
     </>
   );

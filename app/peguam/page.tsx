@@ -19,11 +19,7 @@ export default async function LawyersPage() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Peguam"
-        title="Pasukan Rakan Kongsi Nuaim Razak & Partners"
-        description="Kenali kelayakan, pengalaman dan negeri amalan setiap rakan kongsi firma."
-      />
+      <PageHero {...adminContent.pageHeroes.lawyers} />
       <section className="section">
         <SectionHeading title="Profil Peguam" description="Maklumat profesional dan bidang pengalaman pasukan guaman Syarie kami." />
         <div className="mt-12 space-y-8">
@@ -54,9 +50,7 @@ export default async function LawyersPage() {
                   ))}
                 </ul>
                 <CertificateViewer
-                  certificates={Array.from(
-                    new Map([...lawyer.certificates, ...(adminContent.certificates[lawyer.name] ?? [])].map((certificate) => [certificate.href, certificate])).values()
-                  )}
+                  certificates={lawyer.certificates}
                 />
               </div>
             </article>

@@ -8,7 +8,9 @@ Redesigned website for Nuaim Razak & Partners, a Malaysian Syariah law firm.
 - TypeScript
 - Tailwind CSS
 - lucide-react icons
-- Centralized content in `lib/site-data.ts`
+- Centralized managed content in `data/admin-content.json`
+- PHP 8 + MySQL admin authentication
+- GitHub Actions deployment to Hostinger
 
 ## Run Locally
 
@@ -36,7 +38,17 @@ To preview the production export locally:
 npm run preview
 ```
 
-The former Next.js admin/API routes required a persistent Node.js server and are not included because Hostinger Premium does not support Web Apps. Edit `data/admin-content.json` locally, rebuild, and upload the new `out` contents when managed content changes.
+The public site remains a static export. The `/admin/` dashboard uses small PHP endpoints on Hostinger for MySQL-backed authentication, image uploads and GitHub publishing. Each publication commits `data/admin-content.json` to `main`; `.github/workflows/deploy-hostinger.yml` rebuilds the site and force-pushes the generated export to `hostinger`.
+
+## Admin Setup
+
+1. Create a MySQL database and database user in Hostinger.
+2. Create a fine-grained GitHub token for `G-888/NRP-Website` with **Contents: Read and write** permission.
+3. Copy `public/api/config.example.php` to `nrp-admin-config.php`, fill in the database, GitHub and site-origin values, then upload it one directory above `public_html`. Keeping it outside the public document root prevents deployments and web requests from exposing it. A local `public/api/config.php` fallback is also supported and ignored by Git.
+4. Generate a long random `setup_key` in that configuration.
+5. Open `/admin/`, enter the setup key and create the first admin account. The setup screen locks after the first account is created.
+
+The GitHub token and database password stay in server-side PHP configuration. The browser receives only an HTTP-only session cookie and CSRF token.
 
 ## Useful Commands
 
@@ -55,11 +67,11 @@ npm run build
 - `/artikel`
 - `/hubungi-kami`
 - `/temujanji`
+- `/dasar-privasi`
+- `/admin`
 
 ## Content And Assets
 
-The site uses real firm information, contact details, lawyer profiles, blog titles/excerpts and images from the existing Nuaim Razak & Partners website. Shared firm data, navigation, services, lawyers, FAQs and blog posts are maintained in `lib/site-data.ts`.
+The site uses real firm information, contact details, lawyer profiles, blog titles/excerpts and images from the existing Nuaim Razak & Partners website. Firm details, page headings, homepage content, services, lawyers, certificates, articles and FAQs can be changed from `/admin/`.
 
-## TODO
-
-The appointment/contact form is currently frontend-only with validation and success/error states. Connect it later to an email or backend provider such as a Next.js API route, Resend, Nodemailer, Formspree or an existing WordPress/backend endpoint.
+The appointment form validates input in the browser and opens a pre-filled WhatsApp message. It does not store sensitive case details on the web server.

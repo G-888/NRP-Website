@@ -18,11 +18,7 @@ export default async function ServicesPage() {
 
   return (
     <>
-      <PageHero
-        eyebrow="Bidang Amalan"
-        title="Khidmat Guaman Syarie Untuk Isu Keluarga, Harta Islam Dan Jenayah Syariah"
-        description="Setiap kes memerlukan penelitian fakta, dokumen dan prosedur. Berikut ialah bidang utama yang dikendalikan oleh firma."
-      />
+      <PageHero {...adminContent.pageHeroes.services} />
       <section className="section">
         <SectionHeading title="Perkhidmatan Guaman Syarie" description="Penerangan ringkas tentang skop khidmat yang boleh dibincangkan bersama pihak firma." />
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">

@@ -3,7 +3,8 @@ import { Clock, Mail, MapPin, Phone } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { ContactForm } from "@/components/contact-form";
 import { PageHero } from "@/components/page-hero";
-import { firm } from "@/lib/site-data";
+import { getAdminContent } from "@/lib/admin-content";
+import { getManagedFirm } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   title: "Hubungi Kami",
@@ -11,14 +12,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/hubungi-kami" }
 };
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const adminContent = await getAdminContent();
+  const firm = getManagedFirm(adminContent);
   return (
     <>
-      <PageHero
-        eyebrow="Hubungi Kami"
-        title="Tetapkan Temujanji Konsultasi Guaman Syarie"
-        description="Hubungi kami melalui telefon, WhatsApp, email atau borang pertanyaan. Pihak firma akan menghubungi anda semula mengikut maklumat yang diberikan."
-      />
+      <PageHero {...adminContent.pageHeroes.contact} />
       <section className="section grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <div className="space-y-4">
           <ContactCard icon={Phone} title="Telefon" href={firm.phoneHref} text={firm.phoneDisplay} />
@@ -33,7 +32,7 @@ export default function ContactPage() {
             </ButtonLink>
           </div>
         </div>
-        <ContactForm />
+        <ContactForm whatsappNumber={firm.whatsappNumber} />
       </section>
     </>
   );

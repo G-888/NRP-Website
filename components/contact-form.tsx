@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { caseTypes, firm } from "@/lib/site-data";
+import { caseTypes } from "@/lib/site-data";
 
 type FormState = "idle" | "error";
 
-export function ContactForm() {
+export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
   const [state, setState] = useState<FormState>("idle");
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -33,7 +33,7 @@ export function ContactForm() {
       String(data.get("message") || "")
     ].join("\n");
 
-    window.location.assign(`https://wa.me/${firm.whatsappNumber}?text=${encodeURIComponent(message)}`);
+    window.location.assign(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
   }
 
   return (

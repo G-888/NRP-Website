@@ -10,8 +10,7 @@ import { FadeUp } from "@/components/motion/fade-up";
 import { SectionHeading } from "@/components/section-heading";
 import { ServiceCard } from "@/components/service-card";
 import { getAdminContent } from "@/lib/admin-content";
-import { getManagedLawyers, getManagedServices } from "@/lib/managed-content";
-import { aboutParagraphs, blogPosts, firm, whyChooseUs } from "@/lib/site-data";
+import { getManagedFirm, getManagedLawyers, getManagedServices, getManagedWhyChooseUs } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   alternates: { canonical: "/" }
@@ -21,17 +20,20 @@ export default async function HomePage() {
   const adminContent = await getAdminContent();
   const managedServices = getManagedServices(adminContent);
   const managedLawyers = getManagedLawyers(adminContent);
+  const firm = getManagedFirm(adminContent);
+  const whyChooseUs = getManagedWhyChooseUs(adminContent);
+  const { about, blogPosts, faqs } = adminContent;
 
   return (
     <>
-      <HeroSection content={adminContent.hero} />
+      <HeroSection content={adminContent.hero} firm={firm} />
 
       <FadeUp>
       <section className="section grid items-center gap-14 lg:grid-cols-[1fr_0.95fr]">
         <div>
           <SectionHeading eyebrow="Tentang Kami" title="Selamat Datang ke Firma Nuaim Razak & Partners" />
           <div className="mt-7 space-y-4 text-base leading-8 text-muted sm:text-lg">
-            {aboutParagraphs.map((paragraph) => (
+            {about.paragraphs.map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
           </div>
@@ -111,7 +113,7 @@ export default async function HomePage() {
       </FadeUp>
 
       <FadeUp>
-      <FaqSection />
+      <FaqSection faqs={faqs} />
       </FadeUp>
 
       <FadeUp>
@@ -186,7 +188,7 @@ export default async function HomePage() {
               WhatsApp Kami
             </a>
           </div>
-          <ContactForm />
+          <ContactForm whatsappNumber={firm.whatsappNumber} />
         </div>
       </section>
       </FadeUp>

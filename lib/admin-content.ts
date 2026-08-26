@@ -13,7 +13,28 @@ export type AdminHeroImage = {
   label: string;
 };
 
+export type AdminFirm = {
+  name: string;
+  tagline: string;
+  positioning: string;
+  phoneDisplay: string;
+  whatsappNumber: string;
+  email: string;
+  address: string;
+  hours: string;
+  mapHref: string;
+};
+
+export type AdminPageKey = "about" | "services" | "lawyers" | "articles" | "contact" | "appointment" | "privacy";
+
+export type AdminPageHero = {
+  eyebrow: string;
+  title: string;
+  description: string;
+};
+
 export type AdminLawyerOverride = {
+  displayName?: string;
   image?: string;
   role?: string;
   email?: string;
@@ -33,6 +54,8 @@ export type AdminCustomLawyer = {
 };
 
 export type AdminServiceOverride = {
+  title?: string;
+  slug?: string;
   description?: string;
   details?: string;
   labels?: string[];
@@ -47,13 +70,39 @@ export type AdminCustomService = {
   iconKey: "shield" | "family" | "marriage" | "mediation" | "estate" | "document";
 };
 
+export type AdminAbout = {
+  heading: string;
+  image: string;
+  imageAlt: string;
+  paragraphs: string[];
+  values: Array<{ title: string; copy: string }>;
+};
+
+export type AdminWhyItem = {
+  title: string;
+  copy: string;
+  iconKey: "court" | "advice" | "professional" | "rights";
+};
+
+export type AdminFaq = { question: string; answer: string };
+
+export type AdminBlogPost = {
+  title: string;
+  category: string;
+  date: string;
+  excerpt: string;
+  image: string;
+  href: string;
+};
+
 export type AdminContent = {
-  hero: {
-    eyebrow: string;
-    title: string;
-    paragraph: string;
-    images: AdminHeroImage[];
-  };
+  site: AdminFirm;
+  hero: { eyebrow: string; title: string; paragraph: string; images: AdminHeroImage[] };
+  pageHeroes: Record<AdminPageKey, AdminPageHero>;
+  about: AdminAbout;
+  whyChooseUs: AdminWhyItem[];
+  faqs: AdminFaq[];
+  blogPosts: AdminBlogPost[];
   certificates: Record<string, AdminCertificate[]>;
   lawyers: Record<string, AdminLawyerOverride>;
   services: Record<string, AdminServiceOverride>;
@@ -64,53 +113,95 @@ export type AdminContent = {
 };
 
 export const defaultAdminContent: AdminContent = {
+  site: {
+    name: "Nuaim Razak & Partners",
+    tagline: "Khidmat Guaman Syarie",
+    positioning: "Bantuan Guaman Syarie & Nasihat Perundangan Syariah",
+    phoneDisplay: "011-6505 5757",
+    whatsappNumber: "601165055757",
+    email: "nuaimrazak.bangi@gmail.com",
+    address: "11-2, Jln Puteri 3A/1, Bandar Puteri Bangi, 43000 Kajang, Selangor",
+    hours: "Isnin - Jumaat, 09:00 - 18:00",
+    mapHref: "https://maps.google.com/?q=11-2%2C%20Jln%20Puteri%203A%2F1%2C%20Bandar%20Puteri%20Bangi%2C%2043000%20Kajang%2C%20Selangor"
+  },
   hero: {
     eyebrow: "Nuaim Razak & Partners",
     title: "Khidmat\nGuaman Syarie\nYang Profesional,\nTelus & Berpengalaman",
-    paragraph:
-      "Nuaim Razak & Partners menyediakan khidmat guaman Syarie dan nasihat perundangan Syariah bagi membantu individu dan keluarga menyelesaikan isu berkaitan perkahwinan, kekeluargaan Islam, faraid, hibah, wasiat, pengantaraan keluarga dan jenayah Syariah.",
+    paragraph: "Nuaim Razak & Partners menyediakan khidmat guaman Syarie dan nasihat perundangan Syariah bagi membantu individu dan keluarga menyelesaikan isu berkaitan perkahwinan, kekeluargaan Islam, faraid, hibah, wasiat, pengantaraan keluarga dan jenayah Syariah.",
     images: [
-      {
-        src: "/images/founders.png",
-        alt: "Pasukan Nuaim Razak & Partners",
-        label: "Rakan Kongsi"
-      },
-      {
-        src: "/images/nuaim-majemi.jpeg",
-        alt: "Muhammad Nuaim Bin Majemi",
-        label: "Muhammad Nuaim Bin Majemi"
-      },
-      {
-        src: "/images/abdul-razak.jpeg",
-        alt: "Abdul Razak Bin Mohamad Rawi",
-        label: "Abdul Razak Bin Mohamad Rawi"
-      }
+      { src: "/images/hero-partners-generated-v2.webp", alt: "Muhammad Nuaim Bin Majemi dan Abdul Razak Bin Mohamad Rawi di pejabat Nuaim Razak & Partners", label: "Rakan Kongsi" },
+      { src: "/images/nuaim-majemi.jpeg", alt: "Muhammad Nuaim Bin Majemi", label: "Muhammad Nuaim Bin Majemi" },
+      { src: "/images/abdul-razak.jpeg", alt: "Abdul Razak Bin Mohamad Rawi", label: "Abdul Razak Bin Mohamad Rawi" }
     ]
   },
-  certificates: {},
-  lawyers: {},
-  services: {},
-  customLawyers: [],
-  hiddenLawyers: [],
-  customServices: [],
-  hiddenServices: []
+  pageHeroes: {
+    about: { eyebrow: "Tentang Kami", title: "Firma Guaman Syarie Yang Dibina Atas Komitmen Membela Hak", description: "Ketahui latar belakang Nuaim Razak & Partners, pengalaman firma di Mahkamah Syariah dan nilai profesional yang membimbing setiap tugasan kami." },
+    services: { eyebrow: "Bidang Amalan", title: "Khidmat Guaman Syarie Untuk Isu Keluarga, Harta Islam Dan Jenayah Syariah", description: "Setiap kes memerlukan penelitian fakta, dokumen dan prosedur. Berikut ialah bidang utama yang dikendalikan oleh firma." },
+    lawyers: { eyebrow: "Peguam", title: "Pasukan Rakan Kongsi Nuaim Razak & Partners", description: "Kenali kelayakan, pengalaman dan negeri amalan setiap rakan kongsi firma." },
+    articles: { eyebrow: "Artikel", title: "Catatan Blog Dan Rujukan", description: "Himpunan perkongsian berkaitan keluarga, masyarakat, Islam dan isu undang-undang Syariah." },
+    contact: { eyebrow: "Hubungi Kami", title: "Tetapkan Temujanji Konsultasi Guaman Syarie", description: "Hubungi kami melalui telefon, WhatsApp, email atau borang pertanyaan. Pihak firma akan menghubungi anda semula mengikut maklumat yang diberikan." },
+    appointment: { eyebrow: "Temujanji", title: "Buat Temujanji Konsultasi", description: "Lengkapkan borang ringkas ini supaya pihak firma dapat memahami pertanyaan awal anda sebelum menghubungi semula." },
+    privacy: { eyebrow: "Privasi", title: "Dasar Privasi", description: "Cara Nuaim Razak & Partners mengendalikan maklumat yang diberikan melalui laman web ini." }
+  },
+  about: {
+    heading: "Kisah Firma",
+    image: "/images/firm-story-partners-generated.webp",
+    imageAlt: "Muhammad Nuaim Bin Majemi dan Abdul Razak Bin Mohamad Rawi di pejabat Nuaim Razak & Partners",
+    paragraphs: [
+      "Firma ini lahir dari aspirasi En. Muhammad Nuaim Bin Majemi dan En. Abdul Razak Bin Mohamad Rawi untuk menawarkan khidmat guaman syarie yang lebih komprehensif dan harmonis.",
+      "Kami mempunyai pengalaman yang luas dalam mengendalikan kes-kes di Mahkamah Syariah sama ada di peringkat Mahkamah Rendah, Mahkamah Tinggi dan Mahkamah Rayuan.",
+      "Kami komited untuk memberikan khidmat guaman Syarie kepada anda dalam memastikan hak anda dibela dengan sewajarnya."
+    ],
+    values: [
+      { title: "Misi", copy: "Memberikan khidmat guaman Syarie yang jelas, tersusun dan berhemah kepada klien yang memerlukan panduan undang-undang Syariah." },
+      { title: "Pengalaman Mahkamah Syariah", copy: "Firma mempunyai pengalaman mengendalikan kes di Mahkamah Rendah Syariah, Mahkamah Tinggi Syariah dan Mahkamah Rayuan Syariah." },
+      { title: "Nilai Profesional", copy: "Setiap perkara dikendalikan dengan teliti, sulit, hormat dan berfokus kepada pembelaan hak melalui saluran undang-undang Syariah." }
+    ]
+  },
+  whyChooseUs: [
+    { title: "Pengalaman Mahkamah Syariah", copy: "Berpengalaman mengendalikan kes di Mahkamah Rendah Syariah, Mahkamah Tinggi Syariah dan Mahkamah Rayuan Syariah.", iconKey: "court" },
+    { title: "Nasihat Yang Jelas", copy: "Kami membantu anda memahami proses undang-undang Syariah dengan penerangan yang mudah, teratur dan profesional.", iconKey: "advice" },
+    { title: "Pendekatan Berhemah", copy: "Setiap kes dikendalikan secara teliti, sulit dan berhemah mengikut keperluan klien.", iconKey: "professional" },
+    { title: "Fokus Membela Hak", copy: "Komitmen kami adalah untuk memastikan hak anda dibela dengan sewajarnya melalui saluran undang-undang Syariah.", iconKey: "rights" }
+  ],
+  faqs: [
+    { question: "Mengapa saya perlu mempercayai Firma Guaman anda?", answer: "Nuaim Razak & Partners mempunyai pengalaman yang luas dalam mengendalikan kes-kes di Mahkamah Syariah sama ada di peringkat Mahkamah Rendah, Mahkamah Tinggi dan Mahkamah Rayuan." },
+    { question: "Apakah jenis-jenis kes yang diuruskan oleh Firma Nuaim Razak & Partners?", answer: "Kami menawarkan khidmat Guaman Syarie dalam bidang kekeluargaan Islam, perkahwinan, faraid, hibah, wasiat, pengantaraan keluarga dan jenayah Syariah." },
+    { question: "Bilakah waktu operasi syarikat?", answer: "Kami beroperasi dari hari Isnin hingga Jumaat, dari jam 9 pagi hingga 6 petang, bergantung kepada jadual temujanji." },
+    { question: "Adakah firma guaman anda mengenakan caj konsultasi?", answer: "Sila hubungi firma melalui WhatsApp atau telefon untuk mendapatkan maklumat terkini tentang kadar konsultasi dan kaedah pembayaran." }
+  ],
+  blogPosts: [
+    { title: "Kita Adalah Penyambung Warisan", category: "Malaysia", date: "28/11/2021", excerpt: "KITA ADALAH PENYAMBUNG WARISAN Nikmat Kemerdekaan Kemerdekaan sebuah negara adalah nikmat terbesar kurniaan Allah SWT...", image: "/images/blog-malaysia.png", href: "https://www.nuaimrazak.com/kita-adalah-penyambung-warisan/" },
+    { title: "Cerai dan Rujuk Bukannya Perkara Main-Main", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "CERAI DAN RUJUK BUKANNYA PERKARA MAIN-MAIN. Dua tiga minggu ini saya sangat teruja apabila aktiviti hujung minggu...", image: "/images/blog-cerai-rujuk.png", href: "https://www.nuaimrazak.com/cerai-dan-rujuk-bukannya-perkara-main-main/" },
+    { title: "Ancaman Pihak Ketiga Dalam Perkahwinan", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "ANCAMAN PIHAK KETIGA DALAM PERKAHWINAN. Kehidupan berumah tangga adalah suatu kehidupan yang sangat kompleks...", image: "/images/blog-pihak-ketiga.png", href: "https://www.nuaimrazak.com/ancaman-pihak-ketiga-dalam-perkahwinan/" },
+    { title: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT", category: "Islam", date: "28/11/2021", excerpt: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT...", image: "/images/blog-ahlussunnah.jpg", href: "https://www.nuaimrazak.com/ahlussunnah-wal-jamaah-golongan-yang-selamat/" }
+  ],
+  certificates: {}, lawyers: {}, services: {}, customLawyers: [], hiddenLawyers: [], customServices: [], hiddenServices: []
 };
 
-export async function getAdminContent(): Promise<AdminContent> {
-  const content = storedAdminContent as Partial<AdminContent>;
-
+export function normalizeAdminContent(content: Partial<AdminContent>): AdminContent {
   return {
-    hero: {
-      ...defaultAdminContent.hero,
-      ...(content.hero ?? {}),
-      images: content.hero?.images?.length ? content.hero.images : defaultAdminContent.hero.images
+    ...defaultAdminContent,
+    ...content,
+    site: { ...defaultAdminContent.site, ...(content.site ?? {}) },
+    hero: { ...defaultAdminContent.hero, ...(content.hero ?? {}), images: content.hero?.images?.length ? content.hero.images : defaultAdminContent.hero.images },
+    pageHeroes: Object.fromEntries(
+      Object.entries(defaultAdminContent.pageHeroes).map(([key, value]) => [key, { ...value, ...(content.pageHeroes?.[key as AdminPageKey] ?? {}) }])
+    ) as Record<AdminPageKey, AdminPageHero>,
+    about: {
+      ...defaultAdminContent.about,
+      ...(content.about ?? {}),
+      paragraphs: content.about?.paragraphs?.length ? content.about.paragraphs : defaultAdminContent.about.paragraphs,
+      values: content.about?.values?.length ? content.about.values : defaultAdminContent.about.values
     },
-    certificates: content.certificates ?? {},
-    lawyers: content.lawyers ?? {},
-    services: content.services ?? {},
-    customLawyers: content.customLawyers ?? [],
-    hiddenLawyers: content.hiddenLawyers ?? [],
-    customServices: content.customServices ?? [],
-    hiddenServices: content.hiddenServices ?? []
+    whyChooseUs: content.whyChooseUs?.length ? content.whyChooseUs : defaultAdminContent.whyChooseUs,
+    faqs: content.faqs?.length ? content.faqs : defaultAdminContent.faqs,
+    blogPosts: content.blogPosts?.length ? content.blogPosts : defaultAdminContent.blogPosts,
+    certificates: content.certificates ?? {}, lawyers: content.lawyers ?? {}, services: content.services ?? {},
+    customLawyers: content.customLawyers ?? [], hiddenLawyers: content.hiddenLawyers ?? [], customServices: content.customServices ?? [], hiddenServices: content.hiddenServices ?? []
   };
+}
+
+export async function getAdminContent(): Promise<AdminContent> {
+  return normalizeAdminContent(storedAdminContent as Partial<AdminContent>);
 }

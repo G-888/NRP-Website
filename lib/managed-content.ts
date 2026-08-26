@@ -1,4 +1,4 @@
-import { Baby, Handshake, HeartHandshake, Scale, ScrollText, ShieldCheck } from "lucide-react";
+import { Baby, BookOpenText, BriefcaseBusiness, Handshake, HeartHandshake, Landmark, Scale, ScrollText, ShieldCheck } from "lucide-react";
 import type { AdminContent } from "@/lib/admin-content";
 import { lawyers, services } from "@/lib/site-data";
 
@@ -31,10 +31,14 @@ export function getManagedServices(adminContent: AdminContent) {
 export function getManagedLawyers(adminContent: AdminContent) {
   const baseLawyers = lawyers
     .filter((lawyer) => !adminContent.hiddenLawyers.includes(lawyer.name))
-    .map((lawyer) => ({
-      ...lawyer,
-      ...(adminContent.lawyers[lawyer.name] ?? {})
-    }));
+    .map((lawyer) => {
+      const override = adminContent.lawyers[lawyer.name] ?? {};
+      const { displayName, ...values } = override;
+      const certificates = Object.prototype.hasOwnProperty.call(adminContent.certificates, lawyer.name)
+        ? adminContent.certificates[lawyer.name]
+        : lawyer.certificates;
+      return { ...lawyer, ...values, certificates, name: displayName || lawyer.name };
+    });
 
   const customLawyers = adminContent.customLawyers.map((lawyer) => ({
     certificates: [],
@@ -42,4 +46,29 @@ export function getManagedLawyers(adminContent: AdminContent) {
   }));
 
   return [...baseLawyers, ...customLawyers];
+}
+
+export function getManagedFirm(adminContent: AdminContent) {
+  const site = adminContent.site;
+  const digits = site.whatsappNumber.replace(/\D/g, "");
+  const localPhone = site.phoneDisplay.replace(/\D/g, "");
+  const phoneNumber = localPhone.startsWith("0") ? `6${localPhone}` : localPhone;
+  return {
+    ...site,
+    whatsappNumber: digits,
+    phoneHref: `tel:+${phoneNumber}`,
+    whatsappHref: `https://wa.me/${digits}?text=${encodeURIComponent("Assalamualaikum, saya ingin membuat temujanji konsultasi guaman Syarie.")}`,
+    emailHref: `mailto:${site.email}`
+  };
+}
+
+const whyIconMap = {
+  court: Landmark,
+  advice: BookOpenText,
+  professional: BriefcaseBusiness,
+  rights: Scale
+};
+
+export function getManagedWhyChooseUs(adminContent: AdminContent) {
+  return adminContent.whyChooseUs.map((item) => ({ ...item, icon: whyIconMap[item.iconKey] ?? Scale }));
 }

@@ -28,6 +28,10 @@ body {
   @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-450;
 }
 
+.admin-icon-button {
+  @apply inline-flex h-10 w-10 items-center justify-center border border-slate-200 bg-white text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-45;
+}
+
 .premium-card {
   @apply rounded-3xl border border-line bg-white shadow-subtle;
 }

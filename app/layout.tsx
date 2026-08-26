@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
 import { Inter, Lora } from "next/font/google";
 import "./globals.css";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
-import { TopContactBar } from "@/components/top-contact-bar";
-import { WhatsappFloatingButton } from "@/components/whatsapp-floating-button";
-import { firm } from "@/lib/site-data";
+import { SiteShell } from "@/components/site-shell";
+import { getAdminContent } from "@/lib/admin-content";
+import { getManagedFirm, getManagedServices } from "@/lib/managed-content";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 const lora = Lora({ subsets: ["latin"], variable: "--font-lora" });
@@ -57,48 +55,29 @@ export const metadata: Metadata = {
   ]
 };
 
-const legalServiceSchema = {
-  "@context": "https://schema.org",
-  "@type": "LegalService",
-  name: firm.name,
-  url: "https://www.nuaimrazak.com",
-  logo: "https://www.nuaimrazak.com/images/blue-logo-nrp.png",
-  image: "https://www.nuaimrazak.com/images/hero-partners-generated-v2.webp",
-  telephone: `+${firm.whatsappNumber}`,
-  email: firm.email,
-  description: firm.positioning,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "11-2, Jln Puteri 3A/1, Bandar Puteri Bangi",
-    postalCode: "43000",
-    addressLocality: "Kajang",
-    addressRegion: "Selangor",
-    addressCountry: "MY"
-  },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "09:00",
-      closes: "18:00"
-    }
-  ],
-  areaServed: { "@type": "Country", name: "Malaysia" }
-};
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
+  const adminContent = await getAdminContent();
+  const firm = getManagedFirm(adminContent);
+  const services = getManagedServices(adminContent).map(({ title, slug }) => ({ title, slug }));
+  const legalServiceSchema = {
+    "@context": "https://schema.org",
+    "@type": "LegalService",
+    name: firm.name,
+    url: "https://www.nuaimrazak.com",
+    logo: "https://www.nuaimrazak.com/images/blue-logo-nrp.png",
+    image: "https://www.nuaimrazak.com/images/hero-partners-generated-v2.webp",
+    telephone: `+${firm.whatsappNumber}`,
+    email: firm.email,
+    description: firm.positioning,
+    address: { "@type": "PostalAddress", streetAddress: firm.address, addressCountry: "MY" },
+    areaServed: { "@type": "Country", name: "Malaysia" }
+  };
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="ms" className={`${inter.variable} ${lora.variable}`}>
       <body className="font-sans antialiased">
-        <a href="#main-content" className="focus-ring sr-only z-[100] rounded-md bg-white px-4 py-3 font-semibold text-navy-950 shadow-premium focus:not-sr-only focus:fixed focus:left-4 focus:top-4">
-          Langkau ke kandungan utama
-        </a>
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(legalServiceSchema) }} />
-        <TopContactBar />
-        <SiteHeader />
-        <main id="main-content" tabIndex={-1}>{children}</main>
-        <SiteFooter />
-        <WhatsappFloatingButton />
+        <SiteShell firm={firm} services={services}>{children}</SiteShell>
       </body>
     </html>
   );

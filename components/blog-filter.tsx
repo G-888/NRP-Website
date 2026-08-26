@@ -3,13 +3,12 @@
 import Image from "next/image";
 import { ExternalLink, Search } from "lucide-react";
 import { useMemo, useState } from "react";
-import { blogPosts } from "@/lib/site-data";
+import type { AdminBlogPost } from "@/lib/admin-content";
 
-const categories = ["Semua", ...Array.from(new Set(blogPosts.map((post) => post.category)))];
-
-export function BlogFilter() {
+export function BlogFilter({ blogPosts }: { blogPosts: AdminBlogPost[] }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Semua");
+  const categories = ["Semua", ...Array.from(new Set(blogPosts.map((post) => post.category)))];
 
   const posts = useMemo(() => {
     const normalized = query.toLowerCase();
@@ -18,7 +17,7 @@ export function BlogFilter() {
       const queryMatch = `${post.title} ${post.excerpt} ${post.category}`.toLowerCase().includes(normalized);
       return categoryMatch && queryMatch;
     });
-  }, [category, query]);
+  }, [blogPosts, category, query]);
 
   return (
     <div>

@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { MessageCircle, Phone } from "lucide-react";
 import { ContactForm } from "@/components/contact-form";
 import { PageHero } from "@/components/page-hero";
-import { firm } from "@/lib/site-data";
+import { getAdminContent } from "@/lib/admin-content";
+import { getManagedFirm } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   title: "Temujanji Konsultasi",
@@ -10,14 +11,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/temujanji" }
 };
 
-export default function AppointmentPage() {
+export default async function AppointmentPage() {
+  const adminContent = await getAdminContent();
+  const firm = getManagedFirm(adminContent);
   return (
     <>
-      <PageHero
-        eyebrow="Temujanji"
-        title="Buat Temujanji Konsultasi"
-        description="Lengkapkan borang ringkas ini supaya pihak firma dapat memahami pertanyaan awal anda sebelum menghubungi semula."
-      />
+      <PageHero {...adminContent.pageHeroes.appointment} />
       <section className="section grid gap-10 lg:grid-cols-[0.9fr_1.1fr]">
         <aside className="rounded-[2rem] border border-line bg-navy-radial p-7 text-white shadow-premium sm:p-8">
           <div className="h-px w-14 bg-gold-450" />
@@ -37,7 +36,7 @@ export default function AppointmentPage() {
           </div>
           <p className="mt-6 text-sm leading-6 text-white/62">Maklumat pertanyaan dikendalikan secara sulit dan digunakan untuk tujuan maklum balas awal.</p>
         </aside>
-        <ContactForm />
+        <ContactForm whatsappNumber={firm.whatsappNumber} />
       </section>
     </>
   );

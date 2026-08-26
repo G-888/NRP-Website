@@ -1,0 +1,11 @@
+Options -Indexes
+
+<FilesMatch "^(_bootstrap|config|config\.example|schema).*">
+  Require all denied
+</FilesMatch>
+
+<IfModule mod_headers.c>
+  Header always set Cache-Control "no-store"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "DENY"
+</IfModule>

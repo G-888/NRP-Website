@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Mail, MessageCircle, ShieldCheck } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
 import { PageHero } from "@/components/page-hero";
-import { firm } from "@/lib/site-data";
+import { getAdminContent } from "@/lib/admin-content";
+import { getManagedFirm } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   title: "Dasar Privasi",
@@ -33,14 +34,12 @@ const sections = [
   }
 ];
 
-export default function PrivacyPage() {
+export default async function PrivacyPage() {
+  const adminContent = await getAdminContent();
+  const firm = getManagedFirm(adminContent);
   return (
     <>
-      <PageHero
-        eyebrow="Privasi"
-        title="Dasar Privasi"
-        description="Maklumat ringkas tentang cara firma mengendalikan butiran yang anda berikan ketika membuat pertanyaan."
-      />
+      <PageHero {...adminContent.pageHeroes.privacy} />
       <section className="section">
         <div className="mx-auto max-w-4xl">
           <div className="flex items-center gap-4 border-b border-line pb-6">

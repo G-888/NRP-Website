@@ -1,7 +1,7 @@
 import { MessageCircle } from "lucide-react";
-import { firm } from "@/lib/site-data";
+import type { getManagedFirm } from "@/lib/managed-content";
 
-export function WhatsappFloatingButton() {
+export function WhatsappFloatingButton({ firm }: { firm: ReturnType<typeof getManagedFirm> }) {
   return (
     <a
       href={firm.whatsappHref}

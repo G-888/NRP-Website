@@ -1,7 +1,7 @@
 import { Clock, Mail, Phone } from "lucide-react";
-import { firm } from "@/lib/site-data";
+import type { getManagedFirm } from "@/lib/managed-content";
 
-export function TopContactBar() {
+export function TopContactBar({ firm }: { firm: ReturnType<typeof getManagedFirm> }) {
   return (
     <div className="hidden border-b border-line/10 bg-[#071827] text-white lg:block">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-8 py-2.5 text-sm">

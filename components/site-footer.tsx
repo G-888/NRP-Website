@@ -1,9 +1,10 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Clock, Mail, MapPin, Phone } from "lucide-react";
-import { firm, navigation, services } from "@/lib/site-data";
+import type { getManagedFirm } from "@/lib/managed-content";
+import { navigation } from "@/lib/site-data";
 
-export function SiteFooter() {
+export function SiteFooter({ firm, services }: { firm: ReturnType<typeof getManagedFirm>; services: Array<{ title: string; slug: string }> }) {
   return (
     <footer className="bg-[#071827] text-white">
       <div className="h-1 bg-gradient-to-r from-transparent via-gold-450 to-transparent" />
