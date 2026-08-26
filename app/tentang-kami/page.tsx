@@ -26,7 +26,13 @@ export default function AboutPage() {
             ))}
           </div>
         </div>
-        <Image src="/images/founders.png" alt="Pengasas Nuaim Razak & Partners" width={900} height={980} className="rounded-[2rem] border border-line bg-white object-cover object-top shadow-premium" />
+        <Image
+          src="/images/firm-story-partners-generated.webp"
+          alt="Muhammad Nuaim Bin Majemi dan Abdul Razak Bin Mohamad Rawi di pejabat Nuaim Razak & Partners"
+          width={900}
+          height={980}
+          className="rounded-[2rem] border border-line bg-white object-cover object-top shadow-premium"
+        />
       </section>
       <section className="bg-white">
         <div className="section grid gap-6 md:grid-cols-3">
