@@ -1,5 +1,4 @@
-import { promises as fs } from "node:fs";
-import path from "node:path";
+import storedAdminContent from "@/data/admin-content.json";
 
 export type AdminCertificate = {
   negeri: string;
@@ -96,33 +95,21 @@ export const defaultAdminContent: AdminContent = {
   hiddenServices: []
 };
 
-const contentPath = path.join(process.cwd(), "data", "admin-content.json");
-
 export async function getAdminContent(): Promise<AdminContent> {
-  try {
-    const raw = await fs.readFile(contentPath, "utf8");
-    const parsed = JSON.parse(raw) as Partial<AdminContent>;
+  const content = storedAdminContent as Partial<AdminContent>;
 
-    return {
-      hero: {
-        ...defaultAdminContent.hero,
-        ...(parsed.hero ?? {}),
-        images: parsed.hero?.images?.length ? parsed.hero.images : defaultAdminContent.hero.images
-      },
-      certificates: parsed.certificates ?? {},
-      lawyers: parsed.lawyers ?? {},
-      services: parsed.services ?? {},
-      customLawyers: parsed.customLawyers ?? [],
-      hiddenLawyers: parsed.hiddenLawyers ?? [],
-      customServices: parsed.customServices ?? [],
-      hiddenServices: parsed.hiddenServices ?? []
-    };
-  } catch {
-    return defaultAdminContent;
-  }
-}
-
-export async function saveAdminContent(content: AdminContent) {
-  await fs.mkdir(path.dirname(contentPath), { recursive: true });
-  await fs.writeFile(contentPath, `${JSON.stringify(content, null, 2)}\n`, "utf8");
+  return {
+    hero: {
+      ...defaultAdminContent.hero,
+      ...(content.hero ?? {}),
+      images: content.hero?.images?.length ? content.hero.images : defaultAdminContent.hero.images
+    },
+    certificates: content.certificates ?? {},
+    lawyers: content.lawyers ?? {},
+    services: content.services ?? {},
+    customLawyers: content.customLawyers ?? [],
+    hiddenLawyers: content.hiddenLawyers ?? [],
+    customServices: content.customServices ?? [],
+    hiddenServices: content.hiddenServices ?? []
+  };
 }

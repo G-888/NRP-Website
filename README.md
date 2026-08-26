@@ -19,16 +19,24 @@ npm run dev
 
 Open `http://localhost:3000`.
 
-## Admin Panel
+## Hostinger Premium Deployment
 
-Create `.env.local` based on `.env.example`:
+This project is configured as a static Next.js export for Hostinger Premium hosting. The build creates an `out` directory containing the complete website as HTML, CSS, JavaScript and image files.
 
 ```bash
-ADMIN_PASSWORD=change-this-password
-ADMIN_SESSION_SECRET=change-this-long-random-secret
+npm install
+npm run build:hostinger
 ```
 
-Then open `http://localhost:3000/admin`.
+Upload the **contents inside** `out` to the domain's `public_html` directory in Hostinger File Manager. Do not upload the `out` directory itself as a nested folder.
+
+To preview the production export locally:
+
+```bash
+npm run preview
+```
+
+The former Next.js admin/API routes required a persistent Node.js server and are not included because Hostinger Premium does not support Web Apps. Edit `data/admin-content.json` locally, rebuild, and upload the new `out` contents when managed content changes.
 
 ## Useful Commands
 
