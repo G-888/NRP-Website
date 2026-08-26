@@ -9,7 +9,7 @@ import { LawyerCard } from "@/components/lawyer-card";
 import { FadeUp } from "@/components/motion/fade-up";
 import { SectionHeading } from "@/components/section-heading";
 import { ServiceCard } from "@/components/service-card";
-import { getAdminContent } from "@/lib/admin-content";
+import { getAdminContent, getPublishedArticles } from "@/lib/admin-content";
 import { getManagedFirm, getManagedLawyers, getManagedServices, getManagedWhyChooseUs } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
@@ -22,7 +22,8 @@ export default async function HomePage() {
   const managedLawyers = getManagedLawyers(adminContent);
   const firm = getManagedFirm(adminContent);
   const whyChooseUs = getManagedWhyChooseUs(adminContent);
-  const { about, blogPosts, faqs } = adminContent;
+  const { about, faqs } = adminContent;
+  const blogPosts = getPublishedArticles(adminContent);
 
   return (
     <>
@@ -159,9 +160,9 @@ export default async function HomePage() {
               </p>
               <h3 className="mt-3 font-serif text-2xl font-semibold text-ink">{post.title}</h3>
               <p className="mt-4 text-sm leading-7 text-muted">{post.excerpt}</p>
-              <a href={post.href} target="_blank" rel="noreferrer" className="focus-ring mt-auto pt-6 text-sm font-semibold text-gold-700">
+              <Link href={`/${post.slug}/`} className="focus-ring mt-auto pt-6 text-sm font-semibold text-gold-700">
                 Baca artikel penuh
-              </a>
+              </Link>
             </article>
           ))}
         </div>

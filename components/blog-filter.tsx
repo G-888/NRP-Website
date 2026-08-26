@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { ExternalLink, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import type { AdminBlogPost } from "@/lib/admin-content";
@@ -59,10 +60,10 @@ export function BlogFilter({ blogPosts }: { blogPosts: AdminBlogPost[] }) {
                 </div>
                 <h2 className="mt-3 font-serif text-2xl font-semibold text-ink">{post.title}</h2>
                 <p className="mt-4 text-sm leading-7 text-muted">{post.excerpt}</p>
-                <a href={post.href} target="_blank" rel="noreferrer" className="focus-ring mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-gold-700">
+                <Link href={`/${post.slug}/`} className="focus-ring mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-gold-700">
                   Baca artikel penuh
                   <ExternalLink className="h-4 w-4" />
-                </a>
+                </Link>
               </div>
             </article>
           ))}

@@ -58,6 +58,7 @@ Appointment submissions are stored in MySQL and appear in the admin inbox. The A
 npm run typecheck
 npm run lint
 npm run build
+npm run import:articles
 ```
 
 ## Pages
@@ -74,6 +75,8 @@ npm run build
 
 ## Content And Assets
 
-The site uses real firm information, contact details, lawyer profiles, blog titles/excerpts and images from the existing Nuaim Razak & Partners website. Firm details, page headings, homepage content, services, lawyers, certificates, articles and FAQs can be changed from `/admin/`.
+The site uses real firm information, contact details, lawyer profiles, articles and images from the existing Nuaim Razak & Partners website. Firm details, page headings, homepage content, services, lawyers, certificates, full article content and FAQs can be changed from `/admin/`.
 
-The appointment form validates input in the browser and opens a pre-filled WhatsApp message. It does not store sensitive case details on the web server.
+Published articles are generated as internal static pages using their saved slug. The four legacy WordPress article slugs are preserved at the site root, included in the sitemap and rendered with `Article` structured data. New articles remain private drafts until the admin enables **Terbitkan artikel** and supplies a slug, summary and full content.
+
+The appointment form validates input in the browser and stores enquiries in MySQL for the authenticated admin inbox. It also offers a pre-filled WhatsApp message as an optional follow-up channel.

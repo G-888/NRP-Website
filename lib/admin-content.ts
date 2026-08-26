@@ -93,6 +93,10 @@ export type AdminBlogPost = {
   excerpt: string;
   image: string;
   href: string;
+  slug: string;
+  content: string;
+  published: boolean;
+  legacyWordpressId?: number;
 };
 
 export type AdminContent = {
@@ -171,10 +175,10 @@ export const defaultAdminContent: AdminContent = {
     { question: "Adakah firma guaman anda mengenakan caj konsultasi?", answer: "Sila hubungi firma melalui WhatsApp atau telefon untuk mendapatkan maklumat terkini tentang kadar konsultasi dan kaedah pembayaran." }
   ],
   blogPosts: [
-    { title: "Kita Adalah Penyambung Warisan", category: "Malaysia", date: "28/11/2021", excerpt: "KITA ADALAH PENYAMBUNG WARISAN Nikmat Kemerdekaan Kemerdekaan sebuah negara adalah nikmat terbesar kurniaan Allah SWT...", image: "/images/blog-malaysia.png", href: "https://www.nuaimrazak.com/kita-adalah-penyambung-warisan/" },
-    { title: "Cerai dan Rujuk Bukannya Perkara Main-Main", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "CERAI DAN RUJUK BUKANNYA PERKARA MAIN-MAIN. Dua tiga minggu ini saya sangat teruja apabila aktiviti hujung minggu...", image: "/images/blog-cerai-rujuk.png", href: "https://www.nuaimrazak.com/cerai-dan-rujuk-bukannya-perkara-main-main/" },
-    { title: "Ancaman Pihak Ketiga Dalam Perkahwinan", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "ANCAMAN PIHAK KETIGA DALAM PERKAHWINAN. Kehidupan berumah tangga adalah suatu kehidupan yang sangat kompleks...", image: "/images/blog-pihak-ketiga.png", href: "https://www.nuaimrazak.com/ancaman-pihak-ketiga-dalam-perkahwinan/" },
-    { title: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT", category: "Islam", date: "28/11/2021", excerpt: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT...", image: "/images/blog-ahlussunnah.jpg", href: "https://www.nuaimrazak.com/ahlussunnah-wal-jamaah-golongan-yang-selamat/" }
+    { title: "Kita Adalah Penyambung Warisan", category: "Malaysia", date: "28/11/2021", excerpt: "KITA ADALAH PENYAMBUNG WARISAN Nikmat Kemerdekaan Kemerdekaan sebuah negara adalah nikmat terbesar kurniaan Allah SWT...", image: "/images/blog-malaysia.png", href: "/kita-adalah-penyambung-warisan/", slug: "kita-adalah-penyambung-warisan", content: "", published: true },
+    { title: "Cerai dan Rujuk Bukannya Perkara Main-Main", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "CERAI DAN RUJUK BUKANNYA PERKARA MAIN-MAIN. Dua tiga minggu ini saya sangat teruja apabila aktiviti hujung minggu...", image: "/images/blog-cerai-rujuk.png", href: "/cerai-dan-rujuk-bukannya-perkara-main-main/", slug: "cerai-dan-rujuk-bukannya-perkara-main-main", content: "", published: true },
+    { title: "Ancaman Pihak Ketiga Dalam Perkahwinan", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "ANCAMAN PIHAK KETIGA DALAM PERKAHWINAN. Kehidupan berumah tangga adalah suatu kehidupan yang sangat kompleks...", image: "/images/blog-pihak-ketiga.png", href: "/ancaman-pihak-ketiga-dalam-perkahwinan/", slug: "ancaman-pihak-ketiga-dalam-perkahwinan", content: "", published: true },
+    { title: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT", category: "Islam", date: "28/11/2021", excerpt: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT...", image: "/images/blog-ahlussunnah.jpg", href: "/ahlussunnah-wal-jamaah-golongan-yang-selamat/", slug: "ahlussunnah-wal-jamaah-golongan-yang-selamat", content: "", published: true }
   ],
   certificates: {}, lawyers: {}, services: {}, customLawyers: [], hiddenLawyers: [], customServices: [], hiddenServices: []
 };
@@ -197,10 +201,29 @@ export function normalizeAdminContent(content: Partial<AdminContent>): AdminCont
     },
     whyChooseUs: content.whyChooseUs?.length ? content.whyChooseUs : defaultAdminContent.whyChooseUs,
     faqs: content.faqs?.length ? content.faqs : defaultAdminContent.faqs,
-    blogPosts: content.blogPosts?.length ? content.blogPosts : defaultAdminContent.blogPosts,
+    blogPosts: (content.blogPosts?.length ? content.blogPosts : defaultAdminContent.blogPosts).map((post) => {
+      let slug = post.slug || "";
+      if (!slug && post.href) {
+        try {
+          slug = new URL(post.href, "https://www.nuaimrazak.com").pathname.split("/").filter(Boolean).at(-1) || "";
+        } catch {
+          slug = "";
+        }
+      }
+      return {
+        ...post,
+        slug,
+        content: post.content || "",
+        published: post.published ?? Boolean(slug || post.href)
+      };
+    }),
     certificates: record(content.certificates), lawyers: record(content.lawyers), services: record(content.services),
     customLawyers: content.customLawyers ?? [], hiddenLawyers: content.hiddenLawyers ?? [], customServices: content.customServices ?? [], hiddenServices: content.hiddenServices ?? []
   };
+}
+
+export function getPublishedArticles(content: AdminContent): AdminBlogPost[] {
+  return content.blogPosts.filter((post) => post.published && post.slug && post.content.trim());
 }
 
 export async function getAdminContent(): Promise<AdminContent> {

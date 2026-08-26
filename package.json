@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "build:hostinger": "next build",
+    "import:articles": "node scripts/import-wordpress-articles.mjs",
     "preview": "serve out",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
@@ -15,18 +16,21 @@
     "lucide-react": "^0.468.0",
     "next": "^16.3.3",
     "react": "latest",
-    "react-dom": "latest"
+    "react-dom": "latest",
+    "react-markdown": "^10.1.0"
   },
   "devDependencies": {
     "@types/node": "^20.17.9",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/turndown": "^5.0.6",
     "autoprefixer": "^10.4.20",
     "eslint": "^9.0.0",
     "eslint-config-next": "latest",
     "postcss": "^8.4.49",
     "serve": "^14.2.4",
     "tailwindcss": "^3.4.16",
+    "turndown": "^7.2.4",
     "typescript": "^5.7.2"
   }
 }

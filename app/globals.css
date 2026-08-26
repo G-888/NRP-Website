@@ -90,6 +90,66 @@ body {
   transform: translateY(0);
 }
 
+.article-content {
+  color: #465466;
+  font-size: 1.0625rem;
+  line-height: 1.9;
+}
+
+.article-content > * + * {
+  margin-top: 1.5rem;
+}
+
+.article-content h2,
+.article-content h3 {
+  color: #101b2d;
+  font-family: var(--font-lora), Georgia, serif;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.article-content h2 {
+  margin-top: 2.75rem;
+  font-size: 1.875rem;
+}
+
+.article-content h3 {
+  margin-top: 2.25rem;
+  font-size: 1.5rem;
+}
+
+.article-content strong {
+  color: #101b2d;
+}
+
+.article-content a {
+  color: #936f08;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.article-content ul,
+.article-content ol {
+  padding-left: 1.5rem;
+}
+
+.article-content ul {
+  list-style: disc;
+}
+
+.article-content ol {
+  list-style: decimal;
+}
+
+.article-content blockquote {
+  border-left: 3px solid #c9a227;
+  color: #24364a;
+  font-family: var(--font-lora), Georgia, serif;
+  font-size: 1.15rem;
+  padding-left: 1.25rem;
+}
+
 @keyframes header-in {
   from {
     opacity: 0;
