@@ -25,7 +25,13 @@ if (!is_array($content)) {
 validate_content($content);
 
 $file = github_request('GET', content_api_path($repoPath) . '?ref=' . rawurlencode($github['branch']));
-$json = json_encode($content, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
+$serializedContent = $content;
+foreach (['certificates', 'lawyers', 'services'] as $mapKey) {
+    if (($serializedContent[$mapKey] ?? []) === []) {
+        $serializedContent[$mapKey] = new stdClass();
+    }
+}
+$json = json_encode($serializedContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . "\n";
 $message = trim((string) ($data['message'] ?? 'Update website content'));
 $result = github_request('PUT', content_api_path($repoPath), [
     'message' => mb_substr($message, 0, 120),

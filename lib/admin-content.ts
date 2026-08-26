@@ -180,6 +180,7 @@ export const defaultAdminContent: AdminContent = {
 };
 
 export function normalizeAdminContent(content: Partial<AdminContent>): AdminContent {
+  const record = <T>(value: T | undefined): T => value && typeof value === "object" && !Array.isArray(value) ? value : ({} as T);
   return {
     ...defaultAdminContent,
     ...content,
@@ -197,11 +198,11 @@ export function normalizeAdminContent(content: Partial<AdminContent>): AdminCont
     whyChooseUs: content.whyChooseUs?.length ? content.whyChooseUs : defaultAdminContent.whyChooseUs,
     faqs: content.faqs?.length ? content.faqs : defaultAdminContent.faqs,
     blogPosts: content.blogPosts?.length ? content.blogPosts : defaultAdminContent.blogPosts,
-    certificates: content.certificates ?? {}, lawyers: content.lawyers ?? {}, services: content.services ?? {},
+    certificates: record(content.certificates), lawyers: record(content.lawyers), services: record(content.services),
     customLawyers: content.customLawyers ?? [], hiddenLawyers: content.hiddenLawyers ?? [], customServices: content.customServices ?? [], hiddenServices: content.hiddenServices ?? []
   };
 }
 
 export async function getAdminContent(): Promise<AdminContent> {
-  return normalizeAdminContent(storedAdminContent as Partial<AdminContent>);
+  return normalizeAdminContent(storedAdminContent as unknown as Partial<AdminContent>);
 }
