@@ -21,8 +21,8 @@ const sections = [
     copy: "Maklumat tersebut digunakan untuk memahami pertanyaan awal, menghubungi anda semula, menetapkan temujanji dan mengurus komunikasi berkaitan khidmat guaman Syarie."
   },
   {
-    title: "Penghantaran melalui WhatsApp",
-    copy: "Borang pertanyaan menyediakan mesej WhatsApp pada peranti anda. Mesej hanya dihantar kepada firma selepas anda menyemak dan menekan butang hantar dalam WhatsApp. Penggunaan WhatsApp tertakluk kepada dasar privasi penyedia tersebut."
+    title: "Penyimpanan borang dan WhatsApp",
+    copy: "Maklumat yang dihantar melalui borang disimpan dalam pangkalan data laman firma dan hanya boleh diakses melalui akaun pentadbir. Selepas penghantaran berjaya, anda boleh memilih untuk menghantar butiran yang sama melalui WhatsApp. Penggunaan WhatsApp tertakluk kepada dasar privasi penyedia tersebut."
   },
   {
     title: "Kerahsiaan dan perkongsian",

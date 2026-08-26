@@ -1,19 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { CheckCircle2, LoaderCircle, MessageCircle } from "lucide-react";
 import { FormEvent, useState } from "react";
 import { caseTypes } from "@/lib/site-data";
 
-type FormState = "idle" | "error";
+type FormState = "idle" | "submitting" | "success" | "error";
 
 export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
   const [state, setState] = useState<FormState>("idle");
+  const [feedback, setFeedback] = useState("");
+  const [whatsappHref, setWhatsappHref] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = event.currentTarget;
     if (!form.checkValidity()) {
       setState("error");
+      setFeedback("Sila lengkapkan maklumat yang diperlukan sebelum menghantar pertanyaan.");
       form.reportValidity();
       return;
     }
@@ -33,7 +37,35 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
       String(data.get("message") || "")
     ].join("\n");
 
-    window.location.assign(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+    setState("submitting");
+    setFeedback("");
+    try {
+      const response = await fetch("/api/appointments.php", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: data.get("name"),
+          phone: data.get("phone"),
+          email: data.get("email"),
+          caseType: data.get("caseType"),
+          preferredDate: data.get("preferredDate"),
+          message: data.get("message"),
+          consent: data.get("consent") === "on",
+          website: data.get("website")
+        })
+      });
+      const payload = (await response.json().catch(() => null)) as { error?: string; message?: string } | null;
+      if (!response.ok) throw new Error(payload?.error || "Pertanyaan tidak dapat dihantar.");
+
+      setWhatsappHref(`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`);
+      setFeedback(payload?.message || "Pertanyaan anda telah diterima.");
+      setState("success");
+      form.reset();
+    } catch (error) {
+      setState("error");
+      setFeedback(error instanceof Error ? error.message : "Pertanyaan tidak dapat dihantar. Sila cuba semula.");
+    }
   }
 
   return (
@@ -41,7 +73,11 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
       <div>
         <div className="h-px w-14 bg-gold-450" />
         <h2 className="mt-5 font-serif text-3xl font-semibold text-ink">Borang Temujanji</h2>
-        <p className="mt-3 text-sm leading-7 text-muted">Lengkapkan maklumat ringkas untuk memulakan pertanyaan melalui WhatsApp.</p>
+        <p className="mt-3 text-sm leading-7 text-muted">Lengkapkan maklumat ringkas. Pertanyaan akan dihantar terus kepada pihak firma.</p>
+      </div>
+      <div hidden aria-hidden="true">
+        <label htmlFor="website">Laman web</label>
+        <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Nama penuh" name="name" required autoComplete="name" />
@@ -75,6 +111,8 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
           id="message"
           name="message"
           required
+          minLength={10}
+          maxLength={4000}
           rows={5}
           className="mt-2 w-full rounded-2xl border border-line bg-ivory/50 px-4 py-3 text-ink outline-none transition focus:border-gold-450 focus:bg-white"
         />
@@ -90,12 +128,22 @@ export function ContactForm({ whatsappNumber }: { whatsappNumber: string }) {
           .
         </span>
       </label>
-      <button className="focus-ring min-h-12 rounded-md bg-navy-900 px-5 py-3 text-sm font-semibold text-white shadow-subtle transition hover:bg-navy-800" type="submit">
-        Teruskan ke WhatsApp
+      <button disabled={state === "submitting"} className="focus-ring flex min-h-12 items-center justify-center gap-2 rounded-md bg-navy-900 px-5 py-3 text-sm font-semibold text-white shadow-subtle transition hover:bg-navy-800 disabled:cursor-wait disabled:opacity-60" type="submit">
+        {state === "submitting" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : null}
+        {state === "submitting" ? "Menghantar..." : "Hantar Pertanyaan"}
       </button>
+      {state === "success" ? (
+        <div role="status" aria-live="polite" className="border border-emerald-200 bg-emerald-50 px-4 py-4 text-sm text-emerald-900">
+          <p className="flex items-start gap-2 font-semibold"><CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0" />{feedback}</p>
+          <p className="mt-2 leading-6">Pihak firma akan menghubungi anda. Untuk tindakan lebih segera, anda juga boleh menghantar butiran yang sama melalui WhatsApp.</p>
+          <a href={whatsappHref} target="_blank" rel="noreferrer" className="mt-3 inline-flex min-h-10 items-center gap-2 bg-[#166534] px-3 py-2 font-semibold text-white">
+            <MessageCircle className="h-4 w-4" /> Hantar juga melalui WhatsApp
+          </a>
+        </div>
+      ) : null}
       {state === "error" ? (
         <p role="alert" aria-live="assertive" className="rounded-2xl bg-red-50 px-4 py-3 text-sm font-semibold text-red-800">
-          Sila lengkapkan maklumat yang diperlukan sebelum menghantar pertanyaan.
+          {feedback}
         </p>
       ) : null}
     </form>

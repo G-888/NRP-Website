@@ -41,6 +41,22 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS admin_settings (
     setting_value TEXT NOT NULL,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+$pdo->exec("CREATE TABLE IF NOT EXISTS appointments (
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    phone VARCHAR(40) NOT NULL,
+    email VARCHAR(190) NOT NULL,
+    case_type VARCHAR(120) NOT NULL,
+    preferred_date DATE NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'new',
+    ip_hash CHAR(64) NOT NULL,
+    consent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_appointments_status_created (status, created_at),
+    INDEX idx_appointments_ip_created (ip_hash, created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
 
 $completed = $pdo->query("SELECT setting_value FROM admin_settings WHERE setting_key = 'setup_completed'")->fetchColumn();
 if ($completed === '1') {

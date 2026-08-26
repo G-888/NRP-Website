@@ -7,16 +7,22 @@ import {
   BookOpenText,
   BriefcaseBusiness,
   Building2,
+  CalendarDays,
   Check,
+  CheckCircle2,
   ChevronDown,
   CircleHelp,
   FileText,
   History,
   ImageUp,
+  Inbox,
   LayoutDashboard,
   LoaderCircle,
   LogOut,
+  Mail,
   Menu,
+  MessageCircle,
+  Phone,
   Plus,
   RefreshCw,
   Save,
@@ -61,13 +67,27 @@ type AdminDashboardProps = {
   baseLawyers: BaseLawyer[];
 };
 
-type Tab = "overview" | "general" | "home" | "pages" | "services" | "lawyers" | "articles" | "faq";
+type Tab = "overview" | "appointments" | "general" | "home" | "pages" | "services" | "lawyers" | "articles" | "faq";
 type ApiState = "checking" | "setup" | "signed-out" | "signed-in" | "unavailable";
 type Notice = { tone: "success" | "error" | "info"; message: string } | null;
 type AuditEntry = { id: number; action: string; detail: string; created_at: string; username: string };
+type AppointmentStatus = "new" | "contacted" | "closed";
+type Appointment = {
+  id: number;
+  name: string;
+  phone: string;
+  email: string;
+  case_type: string;
+  preferred_date: string | null;
+  message: string;
+  status: AppointmentStatus;
+  created_at: string;
+  updated_at: string;
+};
 
 const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
   { id: "overview", label: "Ringkasan", icon: LayoutDashboard },
+  { id: "appointments", label: "Temujanji", icon: CalendarDays },
   { id: "general", label: "Maklumat firma", icon: Building2 },
   { id: "home", label: "Laman utama", icon: Settings },
   { id: "pages", label: "Halaman", icon: FileText },
@@ -109,6 +129,9 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [history, setHistory] = useState<AuditEntry[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [appointmentsLoading, setAppointmentsLoading] = useState(false);
+  const [appointmentBusyId, setAppointmentBusyId] = useState<number | null>(null);
 
   const dirty = useMemo(() => JSON.stringify(content) !== JSON.stringify(savedContent), [content, savedContent]);
 
@@ -126,6 +149,18 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
       setHistory(response.entries);
     } catch {
       setHistory([]);
+    }
+  }, []);
+
+  const loadAppointments = useCallback(async () => {
+    setAppointmentsLoading(true);
+    try {
+      const response = await apiRequest<{ appointments: Appointment[] }>("/api/appointments.php");
+      setAppointments(response.appointments);
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Temujanji tidak dapat dimuatkan." });
+    } finally {
+      setAppointmentsLoading(false);
     }
   }, []);
 
@@ -147,11 +182,18 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
         if (active) {
           setApiState("signed-in");
           void loadHistory();
+          void loadAppointments();
         }
       })
       .catch(() => active && setApiState("unavailable"));
     return () => { active = false; };
-  }, [loadContent, loadHistory]);
+  }, [loadAppointments, loadContent, loadHistory]);
+
+  useEffect(() => {
+    if (apiState !== "signed-in") return;
+    const interval = window.setInterval(() => void loadAppointments(), 60000);
+    return () => window.clearInterval(interval);
+  }, [apiState, loadAppointments]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
@@ -176,6 +218,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
       await loadContent(response.csrf);
       setApiState("signed-in");
       void loadHistory();
+      void loadAppointments();
     } catch (error) {
       setNotice({ tone: "error", message: error instanceof Error ? error.message : "Log masuk gagal." });
     } finally {
@@ -264,6 +307,46 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
     return response.path;
   }
 
+  async function updateAppointmentStatus(id: number, status: AppointmentStatus) {
+    setAppointmentBusyId(id);
+    setNotice(null);
+    try {
+      await apiRequest("/api/appointments.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+        body: JSON.stringify({ id, status })
+      });
+      setAppointments((current) => current.map((item) => item.id === id ? { ...item, status } : item));
+      setNotice({ tone: "success", message: "Status temujanji dikemas kini." });
+      void loadHistory();
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Status tidak dapat dikemas kini." });
+    } finally {
+      setAppointmentBusyId(null);
+    }
+  }
+
+  async function deleteAppointment(id: number) {
+    const appointment = appointments.find((item) => item.id === id);
+    if (!window.confirm(`Padam pertanyaan daripada ${appointment?.name || "pelanggan"}? Tindakan ini tidak boleh dibatalkan.`)) return;
+    setAppointmentBusyId(id);
+    setNotice(null);
+    try {
+      await apiRequest("/api/appointments.php", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+        body: JSON.stringify({ id })
+      });
+      setAppointments((current) => current.filter((item) => item.id !== id));
+      setNotice({ tone: "success", message: "Rekod temujanji dipadam." });
+      void loadHistory();
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Rekod tidak dapat dipadam." });
+    } finally {
+      setAppointmentBusyId(null);
+    }
+  }
+
   if (apiState === "checking") return <StatusScreen icon={<LoaderCircle className="h-7 w-7 animate-spin" />} title="Memeriksa sesi admin" />;
   if (apiState === "unavailable") return <UnavailableScreen />;
   if (apiState === "setup") return <SetupScreen busy={busy} notice={notice} onSubmit={setup} />;
@@ -301,7 +384,8 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
             <nav className="space-y-1" aria-label="Bahagian admin">
               {tabs.map((item) => {
                 const Icon = item.icon;
-                return <button key={item.id} type="button" onClick={() => { setTab(item.id); setMenuOpen(false); }} className={`flex min-h-11 w-full items-center gap-3 px-3 text-left text-sm font-semibold ${tab === item.id ? "bg-[#0a1d2e] text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}><Icon className="h-4 w-4" />{item.label}</button>;
+                const newCount = appointments.filter((appointment) => appointment.status === "new").length;
+                return <button key={item.id} type="button" onClick={() => { setTab(item.id); setMenuOpen(false); }} className={`flex min-h-11 w-full items-center gap-3 px-3 text-left text-sm font-semibold ${tab === item.id ? "bg-[#0a1d2e] text-white" : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"}`}><Icon className="h-4 w-4" /><span className="min-w-0 flex-1">{item.label}</span>{item.id === "appointments" && newCount > 0 ? <span className={`inline-flex min-w-6 items-center justify-center px-1.5 py-0.5 text-xs ${tab === item.id ? "bg-white text-[#0a1d2e]" : "bg-amber-100 text-amber-900"}`}>{newCount}</span> : null}</button>;
               })}
             </nav>
             <div className="absolute bottom-4 left-4 right-4 border-t border-slate-200 pt-4">
@@ -313,7 +397,8 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
 
         <div className="min-w-0 p-4 sm:p-6 lg:p-8">
           {notice ? <NoticeBar notice={notice} onClose={() => setNotice(null)} /> : null}
-          {tab === "overview" ? <Overview content={content} history={history} setTab={setTab} /> : null}
+          {tab === "overview" ? <Overview content={content} history={history} appointments={appointments} setTab={setTab} /> : null}
+          {tab === "appointments" ? <AppointmentsInbox appointments={appointments} loading={appointmentsLoading} busyId={appointmentBusyId} onRefresh={loadAppointments} onStatusChange={updateAppointmentStatus} onDelete={deleteAppointment} /> : null}
           {tab === "general" ? <GeneralEditor content={content} setContent={setContent} /> : null}
           {tab === "home" ? <HomeEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "pages" ? <PagesEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
@@ -378,9 +463,109 @@ function RemoveButton({ onClick, label = "Buang" }: { onClick: () => void; label
   return <button type="button" onClick={onClick} className="inline-flex min-h-9 items-center gap-2 px-2 text-sm font-semibold text-red-700 hover:bg-red-50"><Trash2 className="h-4 w-4" />{label}</button>;
 }
 
-function Overview({ content, history, setTab }: { content: AdminContent; history: AuditEntry[]; setTab: (tab: Tab) => void }) {
-  const stats = [{ label: "Bidang amalan", value: 6 - content.hiddenServices.length + content.customServices.length, tab: "services" as Tab, icon: BriefcaseBusiness }, { label: "Profil peguam", value: 3 - content.hiddenLawyers.length + content.customLawyers.length, tab: "lawyers" as Tab, icon: Users }, { label: "Artikel", value: content.blogPosts.length, tab: "articles" as Tab, icon: BookOpenText }, { label: "Soalan lazim", value: content.faqs.length, tab: "faq" as Tab, icon: CircleHelp }];
+function Overview({ content, history, appointments, setTab }: { content: AdminContent; history: AuditEntry[]; appointments: Appointment[]; setTab: (tab: Tab) => void }) {
+  const newAppointments = appointments.filter((appointment) => appointment.status === "new").length;
+  const stats = [{ label: "Temujanji baharu", value: newAppointments, tab: "appointments" as Tab, icon: Inbox }, { label: "Bidang amalan", value: 6 - content.hiddenServices.length + content.customServices.length, tab: "services" as Tab, icon: BriefcaseBusiness }, { label: "Profil peguam", value: 3 - content.hiddenLawyers.length + content.customLawyers.length, tab: "lawyers" as Tab, icon: Users }, { label: "Artikel", value: content.blogPosts.length, tab: "articles" as Tab, icon: BookOpenText }];
   return <><PageTitle title="Ringkasan laman" copy="Urus kandungan utama dan terbitkan perubahan terus ke laman produksi." /><div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">{stats.map(({ label, value, tab, icon: Icon }) => <button type="button" onClick={() => setTab(tab)} key={label} className="border border-slate-200 bg-white p-5 text-left hover:border-[#b8921e]"><Icon className="h-5 w-5 text-[#b8921e]" /><strong className="mt-5 block text-3xl text-[#0a1d2e]">{value}</strong><span className="mt-1 block text-sm text-slate-500">{label}</span></button>)}</div><div className="mt-6 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]"><Panel title="Aliran penerbitan"><ol className="space-y-4 text-sm leading-6 text-slate-600"><li className="flex gap-3"><Check className="mt-0.5 h-5 w-5 text-emerald-600" />Edit kandungan dalam bahagian yang berkaitan.</li><li className="flex gap-3"><Save className="mt-0.5 h-5 w-5 text-[#b8921e]" />Klik Terbitkan untuk menyimpan perubahan ke GitHub.</li><li className="flex gap-3"><RefreshCw className="mt-0.5 h-5 w-5 text-blue-600" />GitHub Actions membina laman statik dan mengemas kini Hostinger.</li></ol></Panel><Panel title="Aktiviti terkini">{history.length ? <div className="divide-y divide-slate-100">{history.slice(0, 6).map((entry) => <div key={entry.id} className="py-3 text-sm"><div className="flex items-center gap-2 font-semibold text-slate-800"><History className="h-4 w-4 text-slate-400" />{entry.action}</div><p className="mt-1 truncate text-xs text-slate-500">{entry.username} · {entry.created_at}</p></div>)}</div> : <p className="text-sm text-slate-500">Belum ada aktiviti direkodkan.</p>}</Panel></div></>;
+}
+
+const appointmentStatus: Record<AppointmentStatus, { label: string; style: string }> = {
+  new: { label: "Baharu", style: "bg-amber-100 text-amber-900" },
+  contacted: { label: "Dihubungi", style: "bg-blue-100 text-blue-900" },
+  closed: { label: "Selesai", style: "bg-emerald-100 text-emerald-900" }
+};
+
+function formatAdminDate(value: string) {
+  const parsed = new Date(value.replace(" ", "T"));
+  if (Number.isNaN(parsed.getTime())) return value;
+  return new Intl.DateTimeFormat("ms-MY", { dateStyle: "medium", timeStyle: "short" }).format(parsed);
+}
+
+function toWhatsAppNumber(phone: string) {
+  const digits = phone.replace(/\D/g, "");
+  return digits.startsWith("0") ? `60${digits.slice(1)}` : digits;
+}
+
+function AppointmentsInbox({ appointments, loading, busyId, onRefresh, onStatusChange, onDelete }: {
+  appointments: Appointment[];
+  loading: boolean;
+  busyId: number | null;
+  onRefresh: () => Promise<void>;
+  onStatusChange: (id: number, status: AppointmentStatus) => Promise<void>;
+  onDelete: (id: number) => Promise<void>;
+}) {
+  const [filter, setFilter] = useState<"all" | AppointmentStatus>("all");
+  const filtered = filter === "all" ? appointments : appointments.filter((appointment) => appointment.status === filter);
+  const filters: Array<{ id: "all" | AppointmentStatus; label: string }> = [
+    { id: "all", label: "Semua" },
+    { id: "new", label: "Baharu" },
+    { id: "contacted", label: "Dihubungi" },
+    { id: "closed", label: "Selesai" }
+  ];
+
+  return <>
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <PageTitle title="Temujanji" copy="Semak pertanyaan daripada borang laman, hubungi pelanggan dan rekodkan tindakan susulan." />
+      <button type="button" onClick={() => void onRefresh()} disabled={loading} className="inline-flex min-h-10 shrink-0 items-center justify-center gap-2 border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50">
+        <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Muat semula
+      </button>
+    </div>
+
+    <div className="mb-5 flex max-w-full gap-1 overflow-x-auto border-b border-slate-200 pb-3" role="tablist" aria-label="Tapis temujanji">
+      {filters.map((item) => {
+        const count = item.id === "all" ? appointments.length : appointments.filter((appointment) => appointment.status === item.id).length;
+        return <button key={item.id} type="button" role="tab" aria-selected={filter === item.id} onClick={() => setFilter(item.id)} className={`min-h-10 whitespace-nowrap px-3 text-sm font-semibold ${filter === item.id ? "bg-[#0a1d2e] text-white" : "bg-white text-slate-600 hover:bg-slate-100"}`}>{item.label} <span className="ml-1 opacity-70">{count}</span></button>;
+      })}
+    </div>
+
+    <section className="border border-slate-200 bg-white">
+      {loading && appointments.length === 0 ? <div className="flex min-h-48 items-center justify-center gap-2 text-sm font-semibold text-slate-500"><LoaderCircle className="h-5 w-5 animate-spin" />Memuatkan temujanji...</div> : null}
+      {!loading && filtered.length === 0 ? <div className="flex min-h-48 flex-col items-center justify-center px-5 text-center"><Inbox className="h-8 w-8 text-slate-300" /><p className="mt-3 font-semibold text-slate-700">Tiada temujanji dalam bahagian ini.</p><p className="mt-1 text-sm text-slate-500">Pertanyaan baharu daripada borang akan muncul di sini.</p></div> : null}
+      <div className="divide-y divide-slate-200">
+        {filtered.map((appointment) => {
+          const status = appointmentStatus[appointment.status];
+          const phoneDigits = appointment.phone.replace(/\D/g, "");
+          const whatsappNumber = toWhatsAppNumber(appointment.phone);
+          const isBusy = busyId === appointment.id;
+          return <article key={appointment.id} className={`p-4 sm:p-5 ${appointment.status === "new" ? "border-l-4 border-l-amber-400" : "border-l-4 border-l-transparent"}`}>
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-bold text-[#0a1d2e]">{appointment.name}</h2>
+                  <span className={`px-2 py-1 text-xs font-bold ${status.style}`}>{status.label}</span>
+                  <span className="text-xs text-slate-400">#{appointment.id}</span>
+                </div>
+                <p className="mt-1 text-sm text-slate-500">Dihantar {formatAdminDate(appointment.created_at)}</p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <a href={`tel:${phoneDigits}`} className="admin-icon-button" title={`Telefon ${appointment.name}`} aria-label={`Telefon ${appointment.name}`}><Phone className="h-4 w-4" /></a>
+                <a href={`https://wa.me/${whatsappNumber}`} target="_blank" rel="noreferrer" className="admin-icon-button" title={`WhatsApp ${appointment.name}`} aria-label={`WhatsApp ${appointment.name}`}><MessageCircle className="h-4 w-4" /></a>
+                <a href={`mailto:${appointment.email}`} className="admin-icon-button" title={`Email ${appointment.name}`} aria-label={`Email ${appointment.name}`}><Mail className="h-4 w-4" /></a>
+                <select value={appointment.status} disabled={isBusy} onChange={(event) => void onStatusChange(appointment.id, event.target.value as AppointmentStatus)} aria-label={`Status ${appointment.name}`} className="min-h-10 border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-[#b8921e]">
+                  <option value="new">Baharu</option>
+                  <option value="contacted">Dihubungi</option>
+                  <option value="closed">Selesai</option>
+                </select>
+                <button type="button" disabled={isBusy} onClick={() => void onDelete(appointment.id)} className="admin-icon-button text-red-700 disabled:opacity-40" title="Padam rekod" aria-label={`Padam rekod ${appointment.name}`}>{isBusy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}</button>
+              </div>
+            </div>
+
+            <dl className="mt-5 grid gap-4 text-sm sm:grid-cols-2 xl:grid-cols-4">
+              <div><dt className="text-xs font-bold uppercase text-slate-400">Telefon</dt><dd className="mt-1 break-words font-semibold text-slate-800">{appointment.phone}</dd></div>
+              <div><dt className="text-xs font-bold uppercase text-slate-400">Email</dt><dd className="mt-1 break-words font-semibold text-slate-800">{appointment.email}</dd></div>
+              <div><dt className="text-xs font-bold uppercase text-slate-400">Jenis kes</dt><dd className="mt-1 font-semibold text-slate-800">{appointment.case_type}</dd></div>
+              <div><dt className="text-xs font-bold uppercase text-slate-400">Tarikh pilihan</dt><dd className="mt-1 font-semibold text-slate-800">{appointment.preferred_date || "Belum ditetapkan"}</dd></div>
+            </dl>
+            <div className="mt-5 border-t border-slate-100 pt-4">
+              <h3 className="text-xs font-bold uppercase text-slate-400">Ringkasan isu</h3>
+              <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">{appointment.message}</p>
+            </div>
+            {appointment.status === "closed" ? <p className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-700"><CheckCircle2 className="h-4 w-4" />Pertanyaan ini telah diselesaikan.</p> : null}
+          </article>;
+        })}
+      </div>
+    </section>
+  </>;
 }
 
 function GeneralEditor({ content, setContent }: EditorProps) {
