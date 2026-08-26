@@ -38,7 +38,7 @@ To preview the production export locally:
 npm run preview
 ```
 
-The public site remains a static export. The `/admin/` dashboard uses small PHP endpoints on Hostinger for MySQL-backed authentication, image uploads and GitHub publishing. Each publication commits `data/admin-content.json` to `main`; `.github/workflows/deploy-hostinger.yml` rebuilds the site and force-pushes the generated export to `hostinger`.
+The public site remains a static export. The `/admin/` dashboard uses small PHP endpoints on Hostinger for MySQL-backed authentication, appointment management, image uploads and GitHub publishing. Each publication commits `data/admin-content.json` to `main`; `.github/workflows/deploy-hostinger.yml` rebuilds the site and force-pushes the generated export to `hostinger`.
 
 ## Admin Setup
 
@@ -49,6 +49,8 @@ The public site remains a static export. The `/admin/` dashboard uses small PHP 
 5. Open `/admin/`, enter the setup key and create the first admin account. The setup screen locks after the first account is created.
 
 The GitHub token and database password stay in server-side PHP configuration. The browser receives only an HTTP-only session cookie and CSRF token.
+
+Appointment submissions are stored in MySQL and appear in the admin inbox. The API attempts to send a notification through the hosting PHP mail service; a mail failure is recorded but never discards the enquiry. Set `notifications.appointment_email` in `nrp-admin-config.php` to override the default firm email address.
 
 ## Useful Commands
 

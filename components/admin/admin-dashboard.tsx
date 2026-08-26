@@ -28,6 +28,7 @@ import {
   Save,
   Scale,
   Settings,
+  ShieldCheck,
   Trash2,
   Users,
   X
@@ -67,7 +68,7 @@ type AdminDashboardProps = {
   baseLawyers: BaseLawyer[];
 };
 
-type Tab = "overview" | "appointments" | "general" | "home" | "pages" | "services" | "lawyers" | "articles" | "faq";
+type Tab = "overview" | "appointments" | "general" | "home" | "pages" | "services" | "lawyers" | "articles" | "faq" | "account";
 type ApiState = "checking" | "setup" | "signed-out" | "signed-in" | "unavailable";
 type Notice = { tone: "success" | "error" | "info"; message: string } | null;
 type AuditEntry = { id: number; action: string; detail: string; created_at: string; username: string };
@@ -80,7 +81,12 @@ type Appointment = {
   case_type: string;
   preferred_date: string | null;
   message: string;
+  admin_notes: string | null;
   status: AppointmentStatus;
+  assigned_to: string | null;
+  scheduled_at: string | null;
+  notification_status: "pending" | "sent" | "failed";
+  notified_at: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -94,7 +100,8 @@ const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
   { id: "services", label: "Bidang amalan", icon: BriefcaseBusiness },
   { id: "lawyers", label: "Peguam", icon: Users },
   { id: "articles", label: "Artikel", icon: BookOpenText },
-  { id: "faq", label: "Soalan lazim", icon: CircleHelp }
+  { id: "faq", label: "Soalan lazim", icon: CircleHelp },
+  { id: "account", label: "Keselamatan", icon: ShieldCheck }
 ];
 
 const pageLabels: Record<AdminPageKey, string> = {
@@ -132,8 +139,10 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [appointmentsLoading, setAppointmentsLoading] = useState(false);
   const [appointmentBusyId, setAppointmentBusyId] = useState<number | null>(null);
+  const [appointmentDirtyIds, setAppointmentDirtyIds] = useState<number[]>([]);
 
   const dirty = useMemo(() => JSON.stringify(content) !== JSON.stringify(savedContent), [content, savedContent]);
+  const hasPendingChanges = dirty || appointmentDirtyIds.length > 0;
 
   const loadContent = useCallback(async (token: string) => {
     const response = await apiRequest<{ content: Partial<AdminContent> }>("/api/content.php");
@@ -157,6 +166,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
     try {
       const response = await apiRequest<{ appointments: Appointment[] }>("/api/appointments.php");
       setAppointments(response.appointments);
+      setAppointmentDirtyIds([]);
     } catch (error) {
       setNotice({ tone: "error", message: error instanceof Error ? error.message : "Temujanji tidak dapat dimuatkan." });
     } finally {
@@ -190,18 +200,18 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
   }, [loadAppointments, loadContent, loadHistory]);
 
   useEffect(() => {
-    if (apiState !== "signed-in") return;
+    if (apiState !== "signed-in" || appointmentDirtyIds.length > 0) return;
     const interval = window.setInterval(() => void loadAppointments(), 60000);
     return () => window.clearInterval(interval);
-  }, [apiState, loadAppointments]);
+  }, [apiState, appointmentDirtyIds.length, loadAppointments]);
 
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
-      if (dirty) event.preventDefault();
+      if (hasPendingChanges) event.preventDefault();
     };
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
-  }, [dirty]);
+  }, [hasPendingChanges]);
 
   async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -326,6 +336,35 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
     }
   }
 
+  function editAppointment(id: number, key: "admin_notes" | "assigned_to" | "scheduled_at", value: string) {
+    setAppointments((current) => current.map((item) => item.id === id ? { ...item, [key]: value || null } : item));
+    setAppointmentDirtyIds((current) => current.includes(id) ? current : [...current, id]);
+  }
+
+  async function saveAppointmentDetails(appointment: Appointment) {
+    setAppointmentBusyId(appointment.id);
+    setNotice(null);
+    try {
+      await apiRequest("/api/appointments.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+        body: JSON.stringify({
+          id: appointment.id,
+          adminNotes: appointment.admin_notes || "",
+          assignedTo: appointment.assigned_to || "",
+          scheduledAt: toDateTimeLocal(appointment.scheduled_at)
+        })
+      });
+      setAppointmentDirtyIds((current) => current.filter((id) => id !== appointment.id));
+      setNotice({ tone: "success", message: "Butiran susulan temujanji disimpan." });
+      void loadHistory();
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Butiran temujanji tidak dapat disimpan." });
+    } finally {
+      setAppointmentBusyId(null);
+    }
+  }
+
   async function deleteAppointment(id: number) {
     const appointment = appointments.find((item) => item.id === id);
     if (!window.confirm(`Padam pertanyaan daripada ${appointment?.name || "pelanggan"}? Tindakan ini tidak boleh dibatalkan.`)) return;
@@ -338,6 +377,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
         body: JSON.stringify({ id })
       });
       setAppointments((current) => current.filter((item) => item.id !== id));
+      setAppointmentDirtyIds((current) => current.filter((dirtyId) => dirtyId !== id));
       setNotice({ tone: "success", message: "Rekod temujanji dipadam." });
       void loadHistory();
     } catch (error) {
@@ -366,7 +406,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <span className={`hidden text-xs font-semibold sm:inline ${dirty ? "text-amber-700" : "text-emerald-700"}`}>{dirty ? "Belum diterbitkan" : "Semua perubahan disimpan"}</span>
+            <span className={`hidden text-xs font-semibold sm:inline ${hasPendingChanges ? "text-amber-700" : "text-emerald-700"}`}>{dirty ? "Kandungan belum diterbitkan" : appointmentDirtyIds.length ? "Butiran temujanji belum disimpan" : "Semua perubahan disimpan"}</span>
             <button type="button" onClick={reload} disabled={busy} className="admin-icon-button" title="Muat semula"><RefreshCw className="h-4 w-4" /></button>
             <button type="button" onClick={publish} disabled={busy || !dirty} className="inline-flex min-h-10 items-center gap-2 bg-[#0a1d2e] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45">
               {busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Terbitkan
@@ -398,7 +438,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
         <div className="min-w-0 p-4 sm:p-6 lg:p-8">
           {notice ? <NoticeBar notice={notice} onClose={() => setNotice(null)} /> : null}
           {tab === "overview" ? <Overview content={content} history={history} appointments={appointments} setTab={setTab} /> : null}
-          {tab === "appointments" ? <AppointmentsInbox appointments={appointments} loading={appointmentsLoading} busyId={appointmentBusyId} onRefresh={loadAppointments} onStatusChange={updateAppointmentStatus} onDelete={deleteAppointment} /> : null}
+          {tab === "appointments" ? <AppointmentsInbox appointments={appointments} loading={appointmentsLoading} busyId={appointmentBusyId} dirtyIds={appointmentDirtyIds} onRefresh={loadAppointments} onStatusChange={updateAppointmentStatus} onEdit={editAppointment} onSave={saveAppointmentDetails} onDelete={deleteAppointment} /> : null}
           {tab === "general" ? <GeneralEditor content={content} setContent={setContent} /> : null}
           {tab === "home" ? <HomeEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "pages" ? <PagesEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
@@ -406,6 +446,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
           {tab === "lawyers" ? <LawyersEditor content={content} setContent={setContent} baseLawyers={baseLawyers} uploadImage={uploadImage} /> : null}
           {tab === "articles" ? <ArticlesEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "faq" ? <FaqEditor content={content} setContent={setContent} /> : null}
+          {tab === "account" ? <AccountSettings csrf={csrf} onCsrf={setCsrf} setNotice={setNotice} /> : null}
         </div>
       </div>
     </div>
@@ -481,17 +522,25 @@ function formatAdminDate(value: string) {
   return new Intl.DateTimeFormat("ms-MY", { dateStyle: "medium", timeStyle: "short" }).format(parsed);
 }
 
+function toDateTimeLocal(value: string | null) {
+  if (!value) return "";
+  return value.replace(" ", "T").slice(0, 16);
+}
+
 function toWhatsAppNumber(phone: string) {
   const digits = phone.replace(/\D/g, "");
   return digits.startsWith("0") ? `60${digits.slice(1)}` : digits;
 }
 
-function AppointmentsInbox({ appointments, loading, busyId, onRefresh, onStatusChange, onDelete }: {
+function AppointmentsInbox({ appointments, loading, busyId, dirtyIds, onRefresh, onStatusChange, onEdit, onSave, onDelete }: {
   appointments: Appointment[];
   loading: boolean;
   busyId: number | null;
+  dirtyIds: number[];
   onRefresh: () => Promise<void>;
   onStatusChange: (id: number, status: AppointmentStatus) => Promise<void>;
+  onEdit: (id: number, key: "admin_notes" | "assigned_to" | "scheduled_at", value: string) => void;
+  onSave: (appointment: Appointment) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
 }) {
   const [filter, setFilter] = useState<"all" | AppointmentStatus>("all");
@@ -527,12 +576,14 @@ function AppointmentsInbox({ appointments, loading, busyId, onRefresh, onStatusC
           const phoneDigits = appointment.phone.replace(/\D/g, "");
           const whatsappNumber = toWhatsAppNumber(appointment.phone);
           const isBusy = busyId === appointment.id;
+          const isDirty = dirtyIds.includes(appointment.id);
           return <article key={appointment.id} className={`p-4 sm:p-5 ${appointment.status === "new" ? "border-l-4 border-l-amber-400" : "border-l-4 border-l-transparent"}`}>
             <div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-lg font-bold text-[#0a1d2e]">{appointment.name}</h2>
                   <span className={`px-2 py-1 text-xs font-bold ${status.style}`}>{status.label}</span>
+                  <span className={`px-2 py-1 text-xs font-bold ${appointment.notification_status === "sent" ? "bg-emerald-50 text-emerald-800" : appointment.notification_status === "failed" ? "bg-red-50 text-red-800" : "bg-slate-100 text-slate-600"}`}>{appointment.notification_status === "sent" ? "Email dihantar" : appointment.notification_status === "failed" ? "Email gagal" : "Email belum direkod"}</span>
                   <span className="text-xs text-slate-400">#{appointment.id}</span>
                 </div>
                 <p className="mt-1 text-sm text-slate-500">Dihantar {formatAdminDate(appointment.created_at)}</p>
@@ -560,11 +611,78 @@ function AppointmentsInbox({ appointments, loading, busyId, onRefresh, onStatusC
               <h3 className="text-xs font-bold uppercase text-slate-400">Ringkasan isu</h3>
               <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">{appointment.message}</p>
             </div>
+            <div className="mt-5 grid gap-4 border-t border-slate-200 pt-5 lg:grid-cols-2">
+              <Field label="Pegawai / peguam ditugaskan" value={appointment.assigned_to || ""} onChange={(value) => onEdit(appointment.id, "assigned_to", value)} />
+              <Field label="Tarikh dan masa disahkan" type="datetime-local" value={toDateTimeLocal(appointment.scheduled_at)} onChange={(value) => onEdit(appointment.id, "scheduled_at", value)} />
+              <div className="lg:col-span-2"><TextArea label="Nota dalaman" value={appointment.admin_notes || ""} onChange={(value) => onEdit(appointment.id, "admin_notes", value)} rows={4} hint="Nota ini hanya dipaparkan kepada admin dan tidak dihantar kepada pelanggan." /></div>
+              <div className="lg:col-span-2 flex justify-end">
+                <button type="button" disabled={isBusy || !isDirty} onClick={() => void onSave(appointment)} className="inline-flex min-h-10 items-center gap-2 bg-[#0a1d2e] px-4 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-45">{isBusy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}Simpan butiran susulan</button>
+              </div>
+            </div>
             {appointment.status === "closed" ? <p className="mt-4 flex items-center gap-2 text-xs font-semibold text-emerald-700"><CheckCircle2 className="h-4 w-4" />Pertanyaan ini telah diselesaikan.</p> : null}
           </article>;
         })}
       </div>
     </section>
+  </>;
+}
+
+function AccountSettings({ csrf, onCsrf, setNotice }: {
+  csrf: string;
+  onCsrf: (token: string) => void;
+  setNotice: React.Dispatch<React.SetStateAction<Notice>>;
+}) {
+  const [busy, setBusy] = useState(false);
+
+  async function changePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const currentPassword = String(data.get("currentPassword") || "");
+    const newPassword = String(data.get("newPassword") || "");
+    const confirmation = String(data.get("confirmPassword") || "");
+    if (newPassword !== confirmation) {
+      setNotice({ tone: "error", message: "Pengesahan kata laluan baharu tidak sepadan." });
+      return;
+    }
+
+    setBusy(true);
+    setNotice(null);
+    try {
+      const response = await apiRequest<{ csrf: string }>("/api/account.php", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json", "X-CSRF-Token": csrf },
+        body: JSON.stringify({ currentPassword, newPassword })
+      });
+      onCsrf(response.csrf);
+      form.reset();
+      setNotice({ tone: "success", message: "Kata laluan admin berjaya dikemas kini." });
+    } catch (error) {
+      setNotice({ tone: "error", message: error instanceof Error ? error.message : "Kata laluan tidak dapat dikemas kini." });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return <>
+    <PageTitle title="Akaun dan keselamatan" copy="Urus kata laluan akaun pentadbir tanpa mendedahkan kelayakan pelayan atau GitHub." />
+    <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <Panel title="Tukar kata laluan">
+        <form onSubmit={changePassword} className="grid gap-5">
+          <Field label="Kata laluan semasa" name="currentPassword" type="password" autoComplete="current-password" required />
+          <Field label="Kata laluan baharu" name="newPassword" type="password" autoComplete="new-password" required hint="Gunakan sekurang-kurangnya 12 aksara dan jangan gunakan semula kata laluan lama." />
+          <Field label="Sahkan kata laluan baharu" name="confirmPassword" type="password" autoComplete="new-password" required />
+          <button type="submit" disabled={busy} className="inline-flex min-h-11 items-center justify-center gap-2 bg-[#0a1d2e] px-4 text-sm font-semibold text-white disabled:opacity-50">{busy ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}Kemas kini kata laluan</button>
+        </form>
+      </Panel>
+      <Panel title="Perlindungan aktif">
+        <ul className="space-y-4 text-sm leading-6 text-slate-600">
+          <li className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />Kata laluan disimpan sebagai hash dan tidak boleh dibaca semula.</li>
+          <li className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />Sesi menggunakan kuki Secure, HTTP-only dan SameSite Strict.</li>
+          <li className="flex gap-3"><CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />Perubahan sensitif dilindungi token CSRF dan direkodkan dalam audit.</li>
+        </ul>
+      </Panel>
+    </div>
   </>;
 }
 

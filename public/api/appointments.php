@@ -4,7 +4,8 @@ require __DIR__ . '/_bootstrap.php';
 
 function ensure_appointments_table(): void
 {
-    database()->exec("CREATE TABLE IF NOT EXISTS appointments (
+    $pdo = database();
+    $pdo->exec("CREATE TABLE IF NOT EXISTS appointments (
         id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
         name VARCHAR(120) NOT NULL,
         phone VARCHAR(40) NOT NULL,
@@ -20,6 +21,21 @@ function ensure_appointments_table(): void
         INDEX idx_appointments_status_created (status, created_at),
         INDEX idx_appointments_ip_created (ip_hash, created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $columns = [
+        'admin_notes' => 'TEXT NULL AFTER message',
+        'assigned_to' => 'VARCHAR(120) NULL AFTER status',
+        'scheduled_at' => 'DATETIME NULL AFTER assigned_to',
+        'notification_status' => "VARCHAR(20) NOT NULL DEFAULT 'pending' AFTER scheduled_at",
+        'notified_at' => 'DATETIME NULL AFTER notification_status',
+    ];
+    $check = $pdo->prepare("SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'appointments' AND COLUMN_NAME = ?");
+    foreach ($columns as $name => $definition) {
+        $check->execute([$name]);
+        if ((int) $check->fetchColumn() === 0) {
+            $pdo->exec("ALTER TABLE appointments ADD COLUMN {$name} {$definition}");
+        }
+    }
 }
 
 function appointment_id(array $data): int
@@ -29,6 +45,43 @@ function appointment_id(array $data): int
         respond(['error' => 'Rekod temujanji tidak sah.'], 422);
     }
     return (int) $id;
+}
+
+function send_appointment_notification(int $id, array $appointment): bool
+{
+    $notifications = config()['notifications'] ?? [];
+    $recipient = trim((string) ($notifications['appointment_email'] ?? 'nuaimrazak.bangi@gmail.com'));
+    if (!filter_var($recipient, FILTER_VALIDATE_EMAIL)) {
+        error_log('NRP appointment notification recipient is invalid.');
+        return false;
+    }
+
+    $siteOrigin = (string) (config()['security']['site_origin'] ?? '');
+    $host = preg_replace('/[^a-zA-Z0-9.-]/', '', (string) parse_url($siteOrigin, PHP_URL_HOST));
+    $from = $host !== '' ? 'no-reply@' . $host : 'no-reply@localhost';
+    $subject = mb_encode_mimeheader('Pertanyaan temujanji baharu #' . $id, 'UTF-8');
+    $body = implode("\n", [
+        'Pertanyaan baharu diterima melalui laman Nuaim Razak & Partners.',
+        '',
+        'Nama: ' . $appointment['name'],
+        'Telefon: ' . $appointment['phone'],
+        'Email: ' . $appointment['email'],
+        'Jenis kes: ' . $appointment['case_type'],
+        'Tarikh pilihan: ' . ($appointment['preferred_date'] ?: 'Belum ditetapkan'),
+        '',
+        'Ringkasan isu:',
+        $appointment['message'],
+        '',
+        'Semak dan urus pertanyaan ini melalui halaman admin.',
+    ]);
+    $headers = [
+        'From: NRP Website <' . $from . '>',
+        'Reply-To: ' . $appointment['email'],
+        'Content-Type: text/plain; charset=UTF-8',
+        'X-Mailer: PHP/' . PHP_VERSION,
+    ];
+
+    return function_exists('mail') && @mail($recipient, $subject, $body, implode("\r\n", $headers));
 }
 
 ensure_appointments_table();
@@ -89,13 +142,27 @@ if ($method === 'POST') {
     $stmt = $pdo->prepare('INSERT INTO appointments (name, phone, email, case_type, preferred_date, message, ip_hash) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([$name, $phone, $email, $caseType, $preferredDate !== '' ? $preferredDate : null, $message, $ipHash]);
     $id = (int) $pdo->lastInsertId();
+    $notificationSent = send_appointment_notification($id, [
+        'name' => $name,
+        'phone' => $phone,
+        'email' => $email,
+        'case_type' => $caseType,
+        'preferred_date' => $preferredDate,
+        'message' => $message,
+    ]);
+    $notification = $pdo->prepare("UPDATE appointments SET notification_status = ?, notified_at = IF(? = 'sent', NOW(), NULL) WHERE id = ?");
+    $notificationStatus = $notificationSent ? 'sent' : 'failed';
+    $notification->execute([$notificationStatus, $notificationStatus, $id]);
     audit('appointment_created', 'Appointment #' . $id);
+    if (!$notificationSent) {
+        audit('appointment_notification_failed', 'Appointment #' . $id);
+    }
     respond(['ok' => true, 'id' => $id, 'message' => 'Pertanyaan anda telah diterima.'], 201);
 }
 
 if ($method === 'GET') {
     require_admin();
-    $appointments = database()->query('SELECT id, name, phone, email, case_type, preferred_date, message, status, created_at, updated_at FROM appointments ORDER BY created_at DESC LIMIT 200')->fetchAll();
+    $appointments = database()->query('SELECT id, name, phone, email, case_type, preferred_date, message, admin_notes, status, assigned_to, scheduled_at, notification_status, notified_at, created_at, updated_at FROM appointments ORDER BY created_at DESC LIMIT 200')->fetchAll();
     $newCount = (int) database()->query("SELECT COUNT(*) FROM appointments WHERE status = 'new'")->fetchColumn();
     respond(['appointments' => $appointments, 'newCount' => $newCount]);
 }
@@ -104,12 +171,57 @@ if ($method === 'PUT') {
     $user = require_admin(true);
     $data = request_json();
     $id = appointment_id($data);
-    $status = (string) ($data['status'] ?? '');
-    if (!in_array($status, ['new', 'contacted', 'closed'], true)) {
-        respond(['error' => 'Status temujanji tidak sah.'], 422);
+
+    $fields = [];
+    $values = [];
+    $changed = [];
+    if (array_key_exists('status', $data)) {
+        $status = (string) $data['status'];
+        if (!in_array($status, ['new', 'contacted', 'closed'], true)) {
+            respond(['error' => 'Status temujanji tidak sah.'], 422);
+        }
+        $fields[] = 'status = ?';
+        $values[] = $status;
+        $changed[] = 'status';
     }
-    $stmt = database()->prepare('UPDATE appointments SET status = ? WHERE id = ?');
-    $stmt->execute([$status, $id]);
+    if (array_key_exists('adminNotes', $data)) {
+        $notes = trim((string) $data['adminNotes']);
+        if (mb_strlen($notes) > 8000) {
+            respond(['error' => 'Nota dalaman terlalu panjang.'], 422);
+        }
+        $fields[] = 'admin_notes = ?';
+        $values[] = $notes !== '' ? $notes : null;
+        $changed[] = 'admin_notes';
+    }
+    if (array_key_exists('assignedTo', $data)) {
+        $assignedTo = trim((string) $data['assignedTo']);
+        if (mb_strlen($assignedTo) > 120) {
+            respond(['error' => 'Nama pegawai terlalu panjang.'], 422);
+        }
+        $fields[] = 'assigned_to = ?';
+        $values[] = $assignedTo !== '' ? $assignedTo : null;
+        $changed[] = 'assigned_to';
+    }
+    if (array_key_exists('scheduledAt', $data)) {
+        $scheduledAt = trim((string) $data['scheduledAt']);
+        if ($scheduledAt !== '') {
+            $parsed = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i', $scheduledAt);
+            if ($parsed === false || $parsed->format('Y-m-d\TH:i') !== $scheduledAt) {
+                respond(['error' => 'Tarikh dan masa temujanji tidak sah.'], 422);
+            }
+            $scheduledAt = $parsed->format('Y-m-d H:i:s');
+        }
+        $fields[] = 'scheduled_at = ?';
+        $values[] = $scheduledAt !== '' ? $scheduledAt : null;
+        $changed[] = 'scheduled_at';
+    }
+    if ($fields === []) {
+        respond(['error' => 'Tiada perubahan untuk disimpan.'], 422);
+    }
+
+    $values[] = $id;
+    $stmt = database()->prepare('UPDATE appointments SET ' . implode(', ', $fields) . ' WHERE id = ?');
+    $stmt->execute($values);
     if ($stmt->rowCount() === 0) {
         $exists = database()->prepare('SELECT 1 FROM appointments WHERE id = ?');
         $exists->execute([$id]);
@@ -117,7 +229,7 @@ if ($method === 'PUT') {
             respond(['error' => 'Rekod temujanji tidak ditemui.'], 404);
         }
     }
-    audit('appointment_status', 'Appointment #' . $id . ' set to ' . $status, $user['id']);
+    audit('appointment_updated', 'Appointment #' . $id . ': ' . implode(', ', $changed), $user['id']);
     respond(['ok' => true]);
 }
 
