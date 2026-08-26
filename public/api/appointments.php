@@ -142,17 +142,25 @@ if ($method === 'POST') {
     $stmt = $pdo->prepare('INSERT INTO appointments (name, phone, email, case_type, preferred_date, message, ip_hash) VALUES (?, ?, ?, ?, ?, ?, ?)');
     $stmt->execute([$name, $phone, $email, $caseType, $preferredDate !== '' ? $preferredDate : null, $message, $ipHash]);
     $id = (int) $pdo->lastInsertId();
-    $notificationSent = send_appointment_notification($id, [
-        'name' => $name,
-        'phone' => $phone,
-        'email' => $email,
-        'case_type' => $caseType,
-        'preferred_date' => $preferredDate,
-        'message' => $message,
-    ]);
-    $notification = $pdo->prepare("UPDATE appointments SET notification_status = ?, notified_at = IF(? = 'sent', NOW(), NULL) WHERE id = ?");
-    $notificationStatus = $notificationSent ? 'sent' : 'failed';
-    $notification->execute([$notificationStatus, $notificationStatus, $id]);
+    $notificationSent = false;
+    try {
+        $notificationSent = send_appointment_notification($id, [
+            'name' => $name,
+            'phone' => $phone,
+            'email' => $email,
+            'case_type' => $caseType,
+            'preferred_date' => $preferredDate,
+            'message' => $message,
+        ]);
+    } catch (Throwable $error) {
+        error_log('NRP appointment email failed: ' . $error->getMessage());
+    }
+    try {
+        $notification = $pdo->prepare('UPDATE appointments SET notification_status = ?, notified_at = ? WHERE id = ?');
+        $notification->execute([$notificationSent ? 'sent' : 'failed', $notificationSent ? gmdate('Y-m-d H:i:s') : null, $id]);
+    } catch (Throwable $error) {
+        error_log('NRP appointment notification status failed: ' . $error->getMessage());
+    }
     audit('appointment_created', 'Appointment #' . $id);
     if (!$notificationSent) {
         audit('appointment_notification_failed', 'Appointment #' . $id);
