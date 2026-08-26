@@ -34,6 +34,7 @@ export const firm = {
   positioning: "Bantuan Guaman Syarie & Nasihat Perundangan Syariah",
   phoneDisplay: "011-6505 5757",
   phoneHref: "tel:+601165055757",
+  whatsappNumber: "601165055757",
   whatsappHref:
     "https://wa.me/601165055757?text=Assalamualaikum%2C%20saya%20ingin%20membuat%20temujanji%20konsultasi%20guaman%20Syarie.",
   email: "nuaimrazak.bangi@gmail.com",
@@ -68,6 +69,7 @@ export const trustBadges = [
 export const services = [
   {
     title: "Jenayah Syariah",
+    slug: "jenayah-syariah",
     description: "Menawarkan perkhidmatan Guaman Syarie bagi membela pihak yang tertuduh.",
     details:
       "Bantuan guaman untuk kes jenayah Syariah, termasuk semakan pertuduhan, penyediaan representasi dan kehadiran di mahkamah mengikut prosedur yang berkaitan.",
@@ -76,6 +78,7 @@ export const services = [
   },
   {
     title: "Mahkamah Keluarga",
+    slug: "mahkamah-keluarga",
     description: "Permohonan pengesahan nasab anak, permohonan sabitan nusyuz dan sebagainya.",
     details:
       "Khidmat guaman bagi urusan kekeluargaan Islam yang memerlukan perintah atau pengesahan Mahkamah Syariah.",
@@ -84,6 +87,7 @@ export const services = [
   },
   {
     title: "Undang-undang Perkahwinan",
+    slug: "undang-undang-perkahwinan",
     description:
       "Permohonan wali hakim, permohonan nafkah isteri, tuntutan nafkah iddah dan sebagainya.",
     details:
@@ -93,6 +97,7 @@ export const services = [
   },
   {
     title: "Pengantaraan Keluarga",
+    slug: "pengantaraan-keluarga",
     description: "Menawarkan perkhidmatan pengantaraan keluarga bagi memudahkan proses rundingan.",
     details:
       "Pendekatan perbincangan berstruktur untuk membantu pihak-pihak mencari penyelesaian secara lebih tenang dan berhemah.",
@@ -101,6 +106,7 @@ export const services = [
   },
   {
     title: "Faraid",
+    slug: "faraid",
     description: "Menawarkan perkhidmatan Guaman Syarie yang berkaitan pembahagian harta pusaka.",
     details:
       "Panduan undang-undang Syariah berkaitan pembahagian harta pusaka, tuntutan dan proses berkaitan faraid.",
@@ -109,6 +115,7 @@ export const services = [
   },
   {
     title: "Hibah & Wasiat",
+    slug: "hibah-wasiat",
     description: "Menawarkan perkhidmatan Guaman Syarie yang berkaitan pengurusan harta Islam.",
     details:
       "Khidmat nasihat dan dokumentasi berkaitan hibah, wasiat serta perancangan pengurusan harta Islam.",
@@ -193,7 +200,7 @@ export const faqs = [
   {
     question: "Adakah firma guaman anda mengenakan caj konsultasi?",
     answer:
-      "Berdasarkan maklumat sedia ada di laman web, firma menawarkan konsultasi percuma. Pengunjung boleh mengisi borang temujanji untuk dihubungi semula."
+      "Sila hubungi firma melalui WhatsApp atau telefon untuk mendapatkan maklumat terkini tentang kadar konsultasi dan kaedah pembayaran."
   }
 ];
 
@@ -204,7 +211,8 @@ export const blogPosts = [
     date: "28/11/2021",
     excerpt:
       "KITA ADALAH PENYAMBUNG WARISAN Nikmat Kemerdekaan Kemerdekaan sebuah negara adalah nikmat terbesar kurniaan Allah SWT...",
-    image: "/images/blog-malaysia.png"
+    image: "/images/blog-malaysia.png",
+    href: "https://www.nuaimrazak.com/kita-adalah-penyambung-warisan/"
   },
   {
     title: "Cerai dan Rujuk Bukannya Perkara Main-Main",
@@ -212,7 +220,8 @@ export const blogPosts = [
     date: "28/11/2021",
     excerpt:
       "CERAI DAN RUJUK BUKANNYA PERKARA MAIN-MAIN. Dua tiga minggu ini saya sangat teruja apabila aktiviti hujung minggu...",
-    image: "/images/blog-cerai-rujuk.png"
+    image: "/images/blog-cerai-rujuk.png",
+    href: "https://www.nuaimrazak.com/cerai-dan-rujuk-bukannya-perkara-main-main/"
   },
   {
     title: "Ancaman Pihak Ketiga Dalam Perkahwinan",
@@ -220,14 +229,16 @@ export const blogPosts = [
     date: "28/11/2021",
     excerpt:
       "ANCAMAN PIHAK KETIGA DALAM PERKAHWINAN. Kehidupan berumah tangga adalah suatu kehidupan yang sangat kompleks...",
-    image: "/images/blog-pihak-ketiga.png"
+    image: "/images/blog-pihak-ketiga.png",
+    href: "https://www.nuaimrazak.com/ancaman-pihak-ketiga-dalam-perkahwinan/"
   },
   {
     title: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT",
     category: "Islam",
     date: "28/11/2021",
     excerpt: "AHLUSSUNNAH WAL JAMA'AH: GOLONGAN YANG SELAMAT...",
-    image: "/images/blog-ahlussunnah.jpg"
+    image: "/images/blog-ahlussunnah.jpg",
+    href: "https://www.nuaimrazak.com/ahlussunnah-wal-jamaah-golongan-yang-selamat/"
   }
 ];
 

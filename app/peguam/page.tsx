@@ -9,7 +9,8 @@ import { getManagedLawyers } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   title: "Peguam",
-  description: "Profil rakan kongsi Nuaim Razak & Partners serta pengalaman mereka sebagai Peguam Syarie."
+  description: "Profil rakan kongsi Nuaim Razak & Partners serta pengalaman mereka sebagai Peguam Syarie.",
+  alternates: { canonical: "/peguam" }
 };
 
 export default async function LawyersPage() {
@@ -21,10 +22,10 @@ export default async function LawyersPage() {
       <PageHero
         eyebrow="Peguam"
         title="Pasukan Rakan Kongsi Nuaim Razak & Partners"
-        description="Profil berikut mengekalkan maklumat sebenar daripada laman sedia ada, termasuk kelayakan, pengalaman dan negeri amalan yang dinyatakan."
+        description="Kenali kelayakan, pengalaman dan negeri amalan setiap rakan kongsi firma."
       />
       <section className="section">
-        <SectionHeading title="Profil Peguam" description="Setiap profil disusun semula untuk lebih jelas, profesional dan mudah dibaca." />
+        <SectionHeading title="Profil Peguam" description="Maklumat profesional dan bidang pengalaman pasukan guaman Syarie kami." />
         <div className="mt-12 space-y-8">
           {managedLawyers.map((lawyer) => (
             <article key={lawyer.name} className="grid gap-8 overflow-hidden rounded-[2rem] border border-line bg-white p-6 shadow-subtle lg:grid-cols-[320px_1fr] lg:p-7">
@@ -52,7 +53,11 @@ export default async function LawyersPage() {
                     </li>
                   ))}
                 </ul>
-                <CertificateViewer certificates={[...lawyer.certificates, ...(adminContent.certificates[lawyer.name] ?? [])]} />
+                <CertificateViewer
+                  certificates={Array.from(
+                    new Map([...lawyer.certificates, ...(adminContent.certificates[lawyer.name] ?? [])].map((certificate) => [certificate.href, certificate])).values()
+                  )}
+                />
               </div>
             </article>
           ))}

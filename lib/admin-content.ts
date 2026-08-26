@@ -40,6 +40,7 @@ export type AdminServiceOverride = {
 
 export type AdminCustomService = {
   title: string;
+  slug?: string;
   description: string;
   details: string;
   labels: string[];

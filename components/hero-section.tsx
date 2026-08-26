@@ -1,5 +1,3 @@
-"use client";
-
 import Image from "next/image";
 import {
   ArrowRight,
@@ -10,7 +8,6 @@ import {
   ScrollText,
   ShieldCheck
 } from "lucide-react";
-import { useState } from "react";
 import { ButtonLink } from "@/components/button-link";
 import type { AdminContent } from "@/lib/admin-content";
 import { firm } from "@/lib/site-data";
@@ -43,7 +40,6 @@ type HeroSectionProps = {
 };
 
 export function HeroSection({ content }: HeroSectionProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
   const headline = content.title.split("\n").filter(Boolean);
   const heroImage = content.images[0];
 
@@ -79,6 +75,7 @@ export function HeroSection({ content }: HeroSectionProps) {
                 <span className="hero-word" style={{ animationDelay: `${140 + index * 95}ms` }}>
                   {line}
                 </span>
+                {index < headline.length - 1 ? " " : null}
               </span>
             ))}
           </h1>
@@ -106,30 +103,21 @@ export function HeroSection({ content }: HeroSectionProps) {
           <div className="mt-7 hidden gap-2.5 sm:grid sm:grid-cols-2" aria-label="Sorotan khidmat">
             {trustItems.map((item, index) => {
               const Icon = item.icon;
-              const selected = activeIndex === index;
 
               return (
-                <button
+                <div
                   key={item.title}
-                  type="button"
-                  onClick={() => setActiveIndex(index)}
-                  onMouseEnter={() => setActiveIndex(index)}
-                  className={`hero-fade-up focus-ring group inline-flex items-center justify-between gap-3 rounded-lg border px-4 py-2.5 text-left text-sm font-semibold shadow-subtle transition ${
-                    selected
-                      ? "border-gold-450 bg-navy-900 text-white"
-                      : "border-white/14 bg-white/8 text-white hover:-translate-y-0.5 hover:border-gold-450 hover:bg-white/12"
-                  }`}
+                  className="hero-fade-up inline-flex items-center justify-between gap-3 rounded-lg border border-white/14 bg-white/8 px-4 py-2.5 text-left text-sm font-semibold text-white shadow-subtle"
                   style={{ animationDelay: `${760 + index * 90}ms` }}
-                  aria-pressed={selected}
                 >
                   <span className="inline-flex items-center gap-2">
-                    <span className={`flex h-8 w-8 items-center justify-center rounded-full transition ${selected ? "bg-gold-450/18" : "bg-white/10 group-hover:bg-gold-450/12"}`}>
-                      <Icon className={`h-4 w-4 ${selected ? "text-gold-450" : "text-gold-100"}`} />
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white/10">
+                      <Icon className="h-4 w-4 text-gold-100" />
                     </span>
                     {item.title}
                   </span>
-                  <CheckCircle2 className={`h-4 w-4 ${selected ? "text-gold-450" : "text-white/20"}`} />
-                </button>
+                  <CheckCircle2 className="h-4 w-4 text-gold-450" />
+                </div>
               );
             })}
           </div>

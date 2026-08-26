@@ -19,8 +19,9 @@ export function getManagedServices(adminContent: AdminContent) {
       ...(adminContent.services[service.title] ?? {})
     }));
 
-  const customServices = adminContent.customServices.map((service) => ({
+  const customServices = adminContent.customServices.map((service, index) => ({
     ...service,
+    slug: service.slug ?? `custom-service-${index + 1}`,
     icon: iconMap[service.iconKey] ?? ScrollText
   }));
 

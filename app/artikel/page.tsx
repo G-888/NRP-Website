@@ -4,7 +4,8 @@ import { PageHero } from "@/components/page-hero";
 
 export const metadata: Metadata = {
   title: "Artikel",
-  description: "Senarai artikel Nuaim Razak & Partners berkaitan Malaysia, Islam dan undang-undang keluarga."
+  description: "Senarai artikel Nuaim Razak & Partners berkaitan Malaysia, Islam dan undang-undang keluarga.",
+  alternates: { canonical: "/artikel" }
 };
 
 export default function ArticlesPage() {
@@ -13,7 +14,7 @@ export default function ArticlesPage() {
       <PageHero
         eyebrow="Artikel"
         title="Catatan Blog Dan Rujukan"
-        description="Artikel sedia ada dikekalkan sebagai arkib bacaan dengan susun atur yang lebih kemas serta fungsi carian ringkas."
+        description="Himpunan perkongsian berkaitan keluarga, masyarakat, Islam dan isu undang-undang Syariah."
       />
       <section className="section">
         <BlogFilter />

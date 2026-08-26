@@ -6,7 +6,8 @@ import { aboutParagraphs } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Tentang Kami",
-  description: "Latar belakang, komitmen dan pengalaman Nuaim Razak & Partners dalam khidmat guaman Syarie."
+  description: "Latar belakang, komitmen dan pengalaman Nuaim Razak & Partners dalam khidmat guaman Syarie.",
+  alternates: { canonical: "/tentang-kami" }
 };
 
 export default function AboutPage() {

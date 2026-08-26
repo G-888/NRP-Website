@@ -6,7 +6,8 @@ import { firm } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Temujanji Konsultasi",
-  description: "Borang temujanji konsultasi guaman Syarie Nuaim Razak & Partners."
+  description: "Borang temujanji konsultasi guaman Syarie Nuaim Razak & Partners.",
+  alternates: { canonical: "/temujanji" }
 };
 
 export default function AppointmentPage() {
@@ -34,9 +35,7 @@ export default function AppointmentPage() {
               WhatsApp Kami
             </a>
           </div>
-          <p className="mt-6 text-sm leading-6 text-white/62">
-            Nota: Borang ini belum disambungkan kepada backend penghantaran email. Integrasi boleh dibuat melalui API route atau penyedia email kemudian.
-          </p>
+          <p className="mt-6 text-sm leading-6 text-white/62">Maklumat pertanyaan dikendalikan secara sulit dan digunakan untuk tujuan maklum balas awal.</p>
         </aside>
         <ContactForm />
       </section>

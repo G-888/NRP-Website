@@ -26,6 +26,9 @@ export function SiteFooter() {
             <Link href="/temujanji" className="hover:text-gold-100">
               Buat Temujanji
             </Link>
+            <Link href="/dasar-privasi" className="hover:text-gold-100">
+              Dasar Privasi
+            </Link>
           </div>
         </div>
         <div>
@@ -33,7 +36,7 @@ export function SiteFooter() {
           <div className="mt-3 h-px w-10 bg-gold-450" />
           <div className="mt-4 grid gap-3 text-sm text-white/75">
             {services.map((service) => (
-              <Link key={service.title} href="/bidang-amalan" className="hover:text-gold-100">
+              <Link key={service.title} href={`/bidang-amalan#${service.slug}`} className="hover:text-gold-100">
                 {service.title}
               </Link>
             ))}

@@ -8,7 +8,8 @@ import { getManagedServices } from "@/lib/managed-content";
 
 export const metadata: Metadata = {
   title: "Bidang Amalan",
-  description: "Bidang amalan guaman Syarie Nuaim Razak & Partners termasuk perkahwinan, keluarga Islam, faraid, hibah, wasiat dan jenayah Syariah."
+  description: "Bidang amalan guaman Syarie Nuaim Razak & Partners termasuk perkahwinan, keluarga Islam, faraid, hibah, wasiat dan jenayah Syariah.",
+  alternates: { canonical: "/bidang-amalan" }
 };
 
 export default async function ServicesPage() {
@@ -23,10 +24,10 @@ export default async function ServicesPage() {
         description="Setiap kes memerlukan penelitian fakta, dokumen dan prosedur. Berikut ialah bidang utama yang dikendalikan oleh firma."
       />
       <section className="section">
-        <SectionHeading title="Perkhidmatan Guaman Syarie" description="Maklumat berikut diperkemas daripada kandungan sedia ada supaya lebih mudah difahami oleh bakal klien." />
+        <SectionHeading title="Perkhidmatan Guaman Syarie" description="Penerangan ringkas tentang skop khidmat yang boleh dibincangkan bersama pihak firma." />
         <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {managedServices.map((service) => (
-            <ServiceCard key={service.title} {...service} detailed />
+            <ServiceCard key={service.title} {...service} id={service.slug} detailed ctaHref="/temujanji" ctaLabel="Buat pertanyaan" />
           ))}
         </div>
       </section>

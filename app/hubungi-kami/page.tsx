@@ -7,7 +7,8 @@ import { firm } from "@/lib/site-data";
 
 export const metadata: Metadata = {
   title: "Hubungi Kami",
-  description: "Hubungi Nuaim Razak & Partners untuk temujanji konsultasi guaman Syarie di Bandar Puteri Bangi, Kajang, Selangor."
+  description: "Hubungi Nuaim Razak & Partners untuk temujanji konsultasi guaman Syarie di Bandar Puteri Bangi, Kajang, Selangor.",
+  alternates: { canonical: "/hubungi-kami" }
 };
 
 export default function ContactPage() {

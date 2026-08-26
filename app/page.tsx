@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, Clock, Mail, MapPin, MessageCircle, Phone } from "lucide-react";
 import { ButtonLink } from "@/components/button-link";
@@ -11,6 +12,10 @@ import { ServiceCard } from "@/components/service-card";
 import { getAdminContent } from "@/lib/admin-content";
 import { getManagedLawyers, getManagedServices } from "@/lib/managed-content";
 import { aboutParagraphs, blogPosts, firm, whyChooseUs } from "@/lib/site-data";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" }
+};
 
 export default async function HomePage() {
   const adminContent = await getAdminContent();
@@ -58,7 +63,7 @@ export default async function HomePage() {
           />
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {managedServices.map((service) => (
-              <ServiceCard key={service.title} {...service} />
+              <ServiceCard key={service.title} {...service} ctaHref={`/bidang-amalan#${service.slug}`} />
             ))}
           </div>
         </div>
@@ -91,7 +96,7 @@ export default async function HomePage() {
       <section className="bg-parchment">
         <div className="section">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-            <SectionHeading eyebrow="Peguam" title="Pasukan Kami" description="Profil rakan kongsi firma berdasarkan maklumat sebenar yang tersedia di laman sedia ada." />
+            <SectionHeading eyebrow="Peguam" title="Pasukan Kami" description="Kenali pengalaman, kelayakan dan bidang amalan rakan kongsi firma." />
             <ButtonLink href="/peguam" variant="secondary">
               Lihat Semua Peguam
             </ButtonLink>
@@ -139,19 +144,22 @@ export default async function HomePage() {
       <FadeUp>
       <section className="section">
         <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-          <SectionHeading eyebrow="Artikel" title="Artikel & Perkongsian" description="Artikel lama dikekalkan sebagai rujukan, tanpa menjadikannya tumpuan utama halaman." />
+          <SectionHeading eyebrow="Artikel" title="Artikel & Perkongsian" description="Perkongsian berkaitan keluarga, masyarakat, Islam dan undang-undang Syariah." />
           <Link href="/artikel" className="inline-flex items-center gap-2 text-sm font-semibold text-gold-700">
             Lihat artikel <ArrowRight className="h-4 w-4" />
           </Link>
         </div>
         <div className="mt-10 grid gap-6 md:grid-cols-3">
           {blogPosts.slice(0, 3).map((post) => (
-            <article key={post.title} className="rounded-3xl border border-line bg-white p-7 shadow-subtle">
+            <article key={post.title} className="flex flex-col rounded-3xl border border-line bg-white p-7 shadow-subtle">
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-gold-700">
-                {post.category} · {post.date}
+                {post.category} / {post.date}
               </p>
               <h3 className="mt-3 font-serif text-2xl font-semibold text-ink">{post.title}</h3>
               <p className="mt-4 text-sm leading-7 text-muted">{post.excerpt}</p>
+              <a href={post.href} target="_blank" rel="noreferrer" className="focus-ring mt-auto pt-6 text-sm font-semibold text-gold-700">
+                Baca artikel penuh
+              </a>
             </article>
           ))}
         </div>

@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { ExternalLink, FileText, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Certificate = {
   negeri: string;
@@ -17,6 +17,46 @@ type CertificateViewerProps = {
 
 export function CertificateViewer({ certificates }: CertificateViewerProps) {
   const [selected, setSelected] = useState<Certificate | null>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!selected) return;
+
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setSelected(null);
+        return;
+      }
+
+      if (event.key !== "Tab" || !dialogRef.current) return;
+      const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button, a[href], iframe, [tabindex]:not([tabindex="-1"])')).filter(
+        (element) => !element.hasAttribute("disabled")
+      );
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last?.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first?.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = previousOverflow;
+      previousFocus?.focus();
+    };
+  }, [selected]);
 
   if (!certificates.length) return null;
 
@@ -48,13 +88,14 @@ export function CertificateViewer({ certificates }: CertificateViewerProps) {
 
       {selected ? (
         <div className="fixed inset-0 z-[70] flex items-center justify-center bg-[#071827]/82 p-4 backdrop-blur-sm" role="dialog" aria-modal="true" aria-label={selected.title}>
-          <div className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-white shadow-premium">
+          <div ref={dialogRef} tabIndex={-1} className="relative max-h-[92vh] w-full max-w-5xl overflow-hidden rounded-[2rem] border border-white/15 bg-white shadow-premium">
             <div className="flex items-start justify-between gap-4 border-b border-line bg-ivory px-5 py-4">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.14em] text-gold-700">{selected.negeri}</p>
                 <h4 className="mt-1 font-serif text-2xl font-semibold text-ink">{selected.title}</h4>
               </div>
               <button
+                ref={closeButtonRef}
                 type="button"
                 onClick={() => setSelected(null)}
                 className="focus-ring flex h-10 w-10 flex-none items-center justify-center rounded-full border border-line bg-white text-ink"

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Search } from "lucide-react";
+import { ExternalLink, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 import { blogPosts } from "@/lib/site-data";
 
@@ -51,15 +51,19 @@ export function BlogFilter() {
       {posts.length ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {posts.map((post) => (
-            <article key={post.title} className="overflow-hidden rounded-3xl border border-line bg-white shadow-subtle transition hover:-translate-y-1 hover:shadow-premium">
+            <article key={post.title} className="flex flex-col overflow-hidden rounded-3xl border border-line bg-white shadow-subtle transition hover:-translate-y-1 hover:shadow-premium">
               <Image src={post.image} alt={post.title} width={450} height={325} className="aspect-[4/2.7] w-full object-cover" />
-              <div className="p-7">
+              <div className="flex flex-1 flex-col p-7">
                 <div className="flex flex-wrap items-center gap-3 text-xs font-semibold uppercase tracking-[0.12em] text-gold-700">
                   <span>{post.category}</span>
                   <span>{post.date}</span>
                 </div>
                 <h2 className="mt-3 font-serif text-2xl font-semibold text-ink">{post.title}</h2>
                 <p className="mt-4 text-sm leading-7 text-muted">{post.excerpt}</p>
+                <a href={post.href} target="_blank" rel="noreferrer" className="focus-ring mt-auto inline-flex items-center gap-2 pt-6 text-sm font-semibold text-gold-700">
+                  Baca artikel penuh
+                  <ExternalLink className="h-4 w-4" />
+                </a>
               </div>
             </article>
           ))}
