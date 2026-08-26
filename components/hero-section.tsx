@@ -52,16 +52,16 @@ export function HeroSection({ content }: HeroSectionProps) {
       <div className="absolute inset-0 bg-navy-radial" aria-hidden="true" />
       <div className="pattern-soft absolute inset-0 opacity-[0.12]" aria-hidden="true" />
       {heroImage ? (
-        <div className="absolute inset-y-0 -right-[5%] hidden w-[63%] overflow-hidden lg:block" aria-hidden="true">
+        <div className="absolute inset-0 hidden overflow-hidden lg:block" aria-hidden="true">
           <Image
             src={heroImage.src}
             alt=""
             fill
-            sizes="63vw"
+            sizes="100vw"
             priority
-            className="hero-image-in object-cover object-[42%_42%] opacity-75"
+            className="hero-image-in object-cover object-center opacity-80"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-[#071827] via-[#071827]/76 to-[#071827]/10" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#071827] via-[#071827]/70 to-[#071827]/10" />
           <div className="absolute inset-0 bg-gradient-to-t from-[#071827]/85 via-transparent to-[#071827]/38" />
         </div>
       ) : null}
