@@ -208,7 +208,7 @@ function content_api_path(string $repoPath): string
 function validate_content(array $content): void
 {
     $requiredObjects = ['site', 'hero', 'pageHeroes', 'about'];
-    $requiredArrays = ['whyChooseUs', 'faqs', 'blogPosts', 'customLawyers', 'hiddenLawyers', 'customServices', 'hiddenServices'];
+    $requiredArrays = ['whyChooseUs', 'faqs', 'galleryItems', 'blogPosts', 'customLawyers', 'hiddenLawyers', 'customServices', 'hiddenServices'];
     foreach ($requiredObjects as $key) {
         if (!isset($content[$key]) || !is_array($content[$key])) {
             respond(['error' => 'Kandungan tidak lengkap: ' . $key], 422);

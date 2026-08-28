@@ -69,6 +69,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     telephone: `+${firm.whatsappNumber}`,
     email: firm.email,
     description: firm.positioning,
+    sameAs: [firm.facebookHref, firm.tiktokHref].filter(Boolean),
     address: { "@type": "PostalAddress", streetAddress: firm.address, addressCountry: "MY" },
     areaServed: { "@type": "Country", name: "Malaysia" }
   };

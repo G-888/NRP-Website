@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { Clock, Facebook, Mail, MapPin, Music2, Phone } from "lucide-react";
 import type { getManagedFirm } from "@/lib/managed-content";
 import { navigation } from "@/lib/site-data";
 
@@ -14,6 +14,10 @@ export function SiteFooter({ firm, services }: { firm: ReturnType<typeof getMana
           <p className="mt-5 text-sm leading-7 text-white/72">
             Kami komited untuk memberikan khidmat guaman Syarie kepada anda dalam memastikan hak anda dibela dengan sewajarnya.
           </p>
+          <div className="mt-6 flex flex-wrap gap-2" aria-label="Media sosial Nuaim Razak & Partners">
+            {firm.facebookHref ? <a href={firm.facebookHref} target="_blank" rel="noreferrer" className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-sm font-semibold text-white/80 transition hover:border-gold-450 hover:text-gold-100" aria-label="Facebook Nuaim Razak & Partners"><Facebook className="h-4 w-4" />Facebook</a> : null}
+            {firm.tiktokHref ? <a href={firm.tiktokHref} target="_blank" rel="noreferrer" className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-full border border-white/15 px-4 text-sm font-semibold text-white/80 transition hover:border-gold-450 hover:text-gold-100" aria-label="TikTok Nuaim Razak & Partners"><Music2 className="h-4 w-4" />TikTok</a> : null}
+          </div>
         </div>
         <div>
           <h2 className="text-sm font-semibold uppercase tracking-[0.16em] text-gold-100">Pautan</h2>

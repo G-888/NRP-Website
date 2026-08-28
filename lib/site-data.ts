@@ -49,6 +49,7 @@ export const navigation = [
   { label: "Tentang Kami", href: "/tentang-kami" },
   { label: "Bidang Amalan", href: "/bidang-amalan" },
   { label: "Peguam", href: "/peguam" },
+  { label: "Galeri", href: "/galeri" },
   { label: "Artikel", href: "/artikel" },
   { label: "Hubungi Kami", href: "/hubungi-kami" }
 ];

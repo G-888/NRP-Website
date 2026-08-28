@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, MessageCircle, X } from "lucide-react";
+import { Facebook, Menu, MessageCircle, Music2, X } from "lucide-react";
 import { useState } from "react";
 import { ButtonLink } from "@/components/button-link";
 import type { getManagedFirm } from "@/lib/managed-content";
@@ -21,7 +21,7 @@ export function SiteHeader({ firm }: { firm: ReturnType<typeof getManagedFirm> }
         <Link href="/" className="focus-ring flex items-center gap-3 rounded-md">
           <Image src="/images/blue-logo-nrp.png" alt={firm.name} width={152} height={50} className="h-11 w-auto" priority />
         </Link>
-        <nav className="hidden items-center gap-7 lg:flex" aria-label="Navigasi utama">
+        <nav className="hidden items-center gap-4 xl:gap-6 lg:flex" aria-label="Navigasi utama">
           {navigation.map((item) => {
             const active = isActive(item.href);
             return (
@@ -72,6 +72,10 @@ export function SiteHeader({ firm }: { firm: ReturnType<typeof getManagedFirm> }
               <MessageCircle className="h-4 w-4" />
               WhatsApp Kami
             </a>
+            <div className="mx-1 mt-2 grid grid-cols-2 gap-2">
+              {firm.facebookHref ? <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white px-3 text-sm font-semibold text-navy-900" href={firm.facebookHref} target="_blank" rel="noreferrer"><Facebook className="h-4 w-4" />Facebook</a> : null}
+              {firm.tiktokHref ? <a className="inline-flex min-h-11 items-center justify-center gap-2 rounded-2xl border border-line bg-white px-3 text-sm font-semibold text-navy-900" href={firm.tiktokHref} target="_blank" rel="noreferrer"><Music2 className="h-4 w-4" />TikTok</a> : null}
+            </div>
             <ButtonLink href="/temujanji" className="mx-1 mt-2 rounded-2xl" onClick={() => setOpen(false)}>
               Buat Temujanji
             </ButtonLink>

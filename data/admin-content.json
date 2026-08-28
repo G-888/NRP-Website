@@ -8,7 +8,9 @@
         "email": "nuaimrazak.bangi@gmail.com",
         "address": "11-2, Jln Puteri 3A/1, Bandar Puteri Bangi, 43000 Kajang, Selangor",
         "hours": "Isnin - Jumaat, 09:00 - 18:00",
-        "mapHref": "https://maps.google.com/?q=11-2%2C%20Jln%20Puteri%203A%2F1%2C%20Bandar%20Puteri%20Bangi%2C%2043000%20Kajang%2C%20Selangor"
+        "mapHref": "https://maps.google.com/?q=11-2%2C%20Jln%20Puteri%203A%2F1%2C%20Bandar%20Puteri%20Bangi%2C%2043000%20Kajang%2C%20Selangor",
+        "facebookHref": "https://www.facebook.com/peguamsyarie.nuaimmajemi",
+        "tiktokHref": "https://www.tiktok.com/@nuaimrazak"
     },
     "hero": {
         "eyebrow": "Nuaim Razak & Partners",
@@ -47,6 +49,11 @@
             "eyebrow": "Peguam",
             "title": "Pasukan Rakan Kongsi Nuaim Razak & Partners",
             "description": "Kenali kelayakan, pengalaman dan negeri amalan setiap rakan kongsi firma."
+        },
+        "gallery": {
+            "eyebrow": "Galeri",
+            "title": "Sorotan Aktiviti Dan Perkembangan Firma",
+            "description": "Ikuti foto terkini aktiviti, program dan perkembangan Nuaim Razak & Partners."
         },
         "articles": {
             "eyebrow": "Artikel",
@@ -131,6 +138,89 @@
         {
             "question": "Adakah firma guaman anda mengenakan caj konsultasi?",
             "answer": "Sila hubungi firma melalui WhatsApp atau telefon untuk mendapatkan maklumat terkini tentang kadar konsultasi dan kaedah pembayaran."
+        }
+    ],
+    "galleryItems": [
+        {
+            "title": "Komitmen Profesional Di Pejabat",
+            "category": "Firma",
+            "date": "2026-08-27",
+            "description": "Suasana kerja profesional di pejabat Nuaim Razak & Partners.",
+            "image": "/images/gallery/nrp-office-portrait.jpeg",
+            "imageAlt": "Peguam berada di meja kerja di pejabat Nuaim Razak & Partners",
+            "published": true
+        },
+        {
+            "title": "Konsultasi Dan Persediaan Kes",
+            "category": "Aktiviti Firma",
+            "date": "2026-08-27",
+            "description": "Persediaan dokumen dan sesi konsultasi dalam talian sebagai sebahagian daripada urusan harian firma.",
+            "image": "/images/gallery/nrp-online-consultation.jpeg",
+            "imageAlt": "Peguam membuat persediaan kes dan konsultasi dalam talian di pejabat",
+            "published": true
+        },
+        {
+            "title": "Ruang Kerja NRP",
+            "category": "Pejabat",
+            "date": "2026-08-27",
+            "description": "Ruang kerja Nuaim Razak & Partners yang tersusun untuk menyokong pengurusan setiap urusan klien.",
+            "image": "/images/gallery/nrp-office-interior.jpeg",
+            "imageAlt": "Ruang kerja dan perpustakaan undang-undang Nuaim Razak & Partners",
+            "published": true
+        },
+        {
+            "title": "Jawatan Kosong Peguam Syarie",
+            "category": "Kerjaya",
+            "date": "2026-08-27",
+            "description": "Peluang kerjaya bersama Nuaim Razak & Partners bagi calon Peguam Syarie yang bersemangat dan berdisiplin.",
+            "image": "/images/gallery/nrp-vacancy-peguam-syarie.jpeg",
+            "imageAlt": "Poster jawatan kosong Peguam Syarie Nuaim Razak & Partners",
+            "published": true
+        },
+        {
+            "title": "Ruang Konsultasi Profesional",
+            "category": "Visual Konsep",
+            "date": "2026-08-29",
+            "description": "Visual konsep ruang konsultasi yang diinspirasikan oleh identiti dan suasana pejabat firma.",
+            "image": "/images/gallery/nrp-concept-consultation-room.png",
+            "imageAlt": "Visual konsep ruang konsultasi firma dengan meja kayu dan kerusi biru gelap",
+            "published": true
+        },
+        {
+            "title": "Ketelitian Dalam Setiap Urusan",
+            "category": "Visual Konsep",
+            "date": "2026-08-29",
+            "description": "Visual konsep yang melambangkan penelitian, persediaan dan profesionalisme dalam pengurusan urusan guaman.",
+            "image": "/images/gallery/nrp-concept-legal-desk.png",
+            "imageAlt": "Visual konsep meja kerja guaman dengan fail, buku, pen dan neraca keadilan",
+            "published": true
+        },
+        {
+            "title": "Rakan Kongsi Firma",
+            "category": "Firma",
+            "date": "",
+            "description": "Nuaim Razak & Partners menyediakan khidmat guaman Syarie secara profesional, telus dan berhemah.",
+            "image": "/images/hero-partners-generated-v2.webp",
+            "imageAlt": "Rakan kongsi Nuaim Razak & Partners",
+            "published": true
+        },
+        {
+            "title": "Pasukan Nuaim Razak & Partners",
+            "category": "Pasukan",
+            "date": "",
+            "description": "Pasukan firma yang komited membantu klien memahami dan mengurus proses undang-undang Syariah.",
+            "image": "/images/founders.png",
+            "imageAlt": "Pasukan Nuaim Razak & Partners",
+            "published": true
+        },
+        {
+            "title": "Khidmat Guaman Syarie",
+            "category": "Firma",
+            "date": "",
+            "description": "Khidmat nasihat dan guaman Syarie untuk individu dan keluarga.",
+            "image": "/images/firm-story-partners-generated.webp",
+            "imageAlt": "Rakan kongsi firma Nuaim Razak & Partners",
+            "published": true
         }
     ],
     "blogPosts": [

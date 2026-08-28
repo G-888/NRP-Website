@@ -15,6 +15,7 @@ import {
   FileText,
   History,
   ImageUp,
+  Images,
   Inbox,
   LayoutDashboard,
   LoaderCircle,
@@ -38,6 +39,7 @@ import type {
   AdminBlogPost,
   AdminContent,
   AdminFaq,
+  AdminGalleryItem,
   AdminPageKey,
   AdminWhyItem
 } from "@/lib/admin-content";
@@ -68,7 +70,7 @@ type AdminDashboardProps = {
   baseLawyers: BaseLawyer[];
 };
 
-type Tab = "overview" | "appointments" | "general" | "home" | "pages" | "services" | "lawyers" | "articles" | "faq" | "account";
+type Tab = "overview" | "appointments" | "general" | "home" | "pages" | "services" | "lawyers" | "gallery" | "articles" | "faq" | "account";
 type ApiState = "checking" | "setup" | "signed-out" | "signed-in" | "unavailable";
 type Notice = { tone: "success" | "error" | "info"; message: string } | null;
 type AuditEntry = { id: number; action: string; detail: string; created_at: string; username: string };
@@ -99,6 +101,7 @@ const tabs: Array<{ id: Tab; label: string; icon: typeof Settings }> = [
   { id: "pages", label: "Halaman", icon: FileText },
   { id: "services", label: "Bidang amalan", icon: BriefcaseBusiness },
   { id: "lawyers", label: "Peguam", icon: Users },
+  { id: "gallery", label: "Galeri", icon: Images },
   { id: "articles", label: "Artikel", icon: BookOpenText },
   { id: "faq", label: "Soalan lazim", icon: CircleHelp },
   { id: "account", label: "Keselamatan", icon: ShieldCheck }
@@ -108,6 +111,7 @@ const pageLabels: Record<AdminPageKey, string> = {
   about: "Tentang Kami",
   services: "Bidang Amalan",
   lawyers: "Peguam",
+  gallery: "Galeri",
   articles: "Artikel",
   contact: "Hubungi Kami",
   appointment: "Temujanji",
@@ -444,6 +448,7 @@ export function AdminDashboard({ initialContent, baseServices, baseLawyers }: Ad
           {tab === "pages" ? <PagesEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "services" ? <ServicesEditor content={content} setContent={setContent} baseServices={baseServices} /> : null}
           {tab === "lawyers" ? <LawyersEditor content={content} setContent={setContent} baseLawyers={baseLawyers} uploadImage={uploadImage} /> : null}
+          {tab === "gallery" ? <GalleryEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "articles" ? <ArticlesEditor content={content} setContent={setContent} uploadImage={uploadImage} /> : null}
           {tab === "faq" ? <FaqEditor content={content} setContent={setContent} /> : null}
           {tab === "account" ? <AccountSettings csrf={csrf} onCsrf={setCsrf} setNotice={setNotice} /> : null}
@@ -688,7 +693,7 @@ function AccountSettings({ csrf, onCsrf, setNotice }: {
 
 function GeneralEditor({ content, setContent }: EditorProps) {
   const update = (key: keyof AdminContent["site"], value: string) => setContent((current) => ({ ...current, site: { ...current.site, [key]: value } }));
-  return <><PageTitle title="Maklumat firma" copy="Butiran ini digunakan pada header, footer, borang, pautan WhatsApp dan data carian berstruktur." /><Panel title="Identiti"><div className="grid gap-5 md:grid-cols-2"><Field label="Nama firma" value={content.site.name} onChange={(v) => update("name", v)} /><Field label="Tagline" value={content.site.tagline} onChange={(v) => update("tagline", v)} /><div className="md:col-span-2"><Field label="Kedudukan firma" value={content.site.positioning} onChange={(v) => update("positioning", v)} /></div></div></Panel><Panel title="Hubungan dan lokasi"><div className="grid gap-5 md:grid-cols-2"><Field label="Paparan nombor telefon" value={content.site.phoneDisplay} onChange={(v) => update("phoneDisplay", v)} /><Field label="Nombor WhatsApp" value={content.site.whatsappNumber} onChange={(v) => update("whatsappNumber", v)} hint="Nombor sahaja dengan kod negara, contoh 601165055757." /><Field label="Email" type="email" value={content.site.email} onChange={(v) => update("email", v)} /><Field label="Waktu operasi" value={content.site.hours} onChange={(v) => update("hours", v)} /><div className="md:col-span-2"><TextArea label="Alamat" value={content.site.address} onChange={(v) => update("address", v)} rows={3} /></div><div className="md:col-span-2"><Field label="Pautan Google Maps" value={content.site.mapHref} onChange={(v) => update("mapHref", v)} /></div></div></Panel></>;
+  return <><PageTitle title="Maklumat firma" copy="Butiran ini digunakan pada header, footer, borang, pautan WhatsApp dan data carian berstruktur." /><Panel title="Identiti"><div className="grid gap-5 md:grid-cols-2"><Field label="Nama firma" value={content.site.name} onChange={(v) => update("name", v)} /><Field label="Tagline" value={content.site.tagline} onChange={(v) => update("tagline", v)} /><div className="md:col-span-2"><Field label="Kedudukan firma" value={content.site.positioning} onChange={(v) => update("positioning", v)} /></div></div></Panel><Panel title="Hubungan dan lokasi"><div className="grid gap-5 md:grid-cols-2"><Field label="Paparan nombor telefon" value={content.site.phoneDisplay} onChange={(v) => update("phoneDisplay", v)} /><Field label="Nombor WhatsApp" value={content.site.whatsappNumber} onChange={(v) => update("whatsappNumber", v)} hint="Nombor sahaja dengan kod negara, contoh 601165055757." /><Field label="Email" type="email" value={content.site.email} onChange={(v) => update("email", v)} /><Field label="Waktu operasi" value={content.site.hours} onChange={(v) => update("hours", v)} /><div className="md:col-span-2"><TextArea label="Alamat" value={content.site.address} onChange={(v) => update("address", v)} rows={3} /></div><div className="md:col-span-2"><Field label="Pautan Google Maps" value={content.site.mapHref} onChange={(v) => update("mapHref", v)} /></div></div></Panel><Panel title="Media sosial"><div className="grid gap-5 md:grid-cols-2"><Field label="Pautan Facebook" value={content.site.facebookHref} onChange={(v) => update("facebookHref", v)} /><Field label="Pautan TikTok" value={content.site.tiktokHref} onChange={(v) => update("tiktokHref", v)} /></div></Panel></>;
 }
 
 type EditorProps = { content: AdminContent; setContent: React.Dispatch<React.SetStateAction<AdminContent>> };
@@ -724,6 +729,27 @@ function LawyersEditor({ content, setContent, baseLawyers, uploadImage }: Upload
 
 function updateCertificate(setContent: EditorProps["setContent"], name: string, certificates: AdminContent["certificates"][string], index: number, key: "negeri" | "title" | "href", value: string) { setContent((c) => ({ ...c, certificates: { ...c.certificates, [name]: certificates.map((x, i) => i === index ? { ...x, [key]: value } : x) } })); }
 function updateCustomLawyer(setContent: EditorProps["setContent"], index: number, key: string, value: string | string[]) { setContent((c) => ({ ...c, customLawyers: c.customLawyers.map((x, i) => i === index ? { ...x, [key]: value } : x) })); }
+
+function GalleryEditor({ content, setContent, uploadImage }: UploadEditorProps) {
+  const add = () => setContent((current) => ({
+    ...current,
+    galleryItems: [{
+      title: "Foto baharu",
+      category: "Aktiviti Firma",
+      date: new Date().toISOString().slice(0, 10),
+      description: "",
+      image: "",
+      imageAlt: "",
+      published: false
+    }, ...current.galleryItems]
+  }));
+  const update = (index: number, key: keyof AdminGalleryItem, value: string | boolean) => setContent((current) => ({
+    ...current,
+    galleryItems: current.galleryItems.map((item, itemIndex) => itemIndex === index ? { ...item, [key]: value } : item)
+  }));
+
+  return <><PageTitle title="Galeri" copy="Muat naik foto aktiviti firma, tambah kapsyen dan tentukan foto yang dipaparkan pada halaman Galeri." /><section className="border border-slate-200 bg-white p-5"><ArrayHeader title={`${content.galleryItems.length} foto`} onAdd={add} /><div className="space-y-4">{content.galleryItems.map((item, index) => <details key={`${item.image}-${index}`} className="border border-slate-200"><summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3"><span><strong className="block">{item.title}</strong><span className="text-xs text-slate-500">{item.published ? "Dipaparkan" : "Draf"} · {item.category || "Umum"}{item.date ? ` · ${item.date}` : ""}</span></span><ChevronDown className="h-4 w-4" /></summary><div className="grid gap-4 border-t border-slate-200 p-4"><div className="flex flex-wrap items-center justify-between gap-3"><label className="flex items-center gap-3 text-sm font-semibold"><input type="checkbox" checked={item.published} onChange={(event) => update(index, "published", event.target.checked)} className="h-4 w-4" />Paparkan pada galeri</label><RemoveButton onClick={() => setContent((current) => ({ ...current, galleryItems: current.galleryItems.filter((_, itemIndex) => itemIndex !== index) }))} /></div><div className="grid gap-4 md:grid-cols-2"><Field label="Tajuk foto" value={item.title} onChange={(value) => update(index, "title", value)} /><Field label="Kategori" value={item.category} onChange={(value) => update(index, "category", value)} hint="Contoh: Aktiviti Firma, Program atau Pasukan." /><Field label="Tarikh" type="date" value={item.date} onChange={(value) => update(index, "date", value)} /><Field label="Teks alternatif imej" value={item.imageAlt} onChange={(value) => update(index, "imageAlt", value)} hint="Terangkan foto secara ringkas untuk aksesibiliti." /><div className="md:col-span-2"><ImageField label="Foto" value={item.image} onChange={(value) => update(index, "image", value)} uploadImage={uploadImage} /></div></div><TextArea label="Kapsyen / penerangan" value={item.description} onChange={(value) => update(index, "description", value)} rows={4} /></div></details>)}</div></section></>;
+}
 
 function ArticlesEditor({ content, setContent, uploadImage }: UploadEditorProps) {
   const add = () => setContent((c) => ({ ...c, blogPosts: [{ title: "Artikel baharu", category: "Umum", date: new Date().toLocaleDateString("en-GB"), excerpt: "", image: "/images/blog-malaysia.png", href: "", slug: "", content: "", published: false }, ...c.blogPosts] }));

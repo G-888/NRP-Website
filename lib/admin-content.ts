@@ -23,9 +23,11 @@ export type AdminFirm = {
   address: string;
   hours: string;
   mapHref: string;
+  facebookHref: string;
+  tiktokHref: string;
 };
 
-export type AdminPageKey = "about" | "services" | "lawyers" | "articles" | "contact" | "appointment" | "privacy";
+export type AdminPageKey = "about" | "services" | "lawyers" | "gallery" | "articles" | "contact" | "appointment" | "privacy";
 
 export type AdminPageHero = {
   eyebrow: string;
@@ -99,6 +101,16 @@ export type AdminBlogPost = {
   legacyWordpressId?: number;
 };
 
+export type AdminGalleryItem = {
+  title: string;
+  category: string;
+  date: string;
+  description: string;
+  image: string;
+  imageAlt: string;
+  published: boolean;
+};
+
 export type AdminContent = {
   site: AdminFirm;
   hero: { eyebrow: string; title: string; paragraph: string; images: AdminHeroImage[] };
@@ -106,6 +118,7 @@ export type AdminContent = {
   about: AdminAbout;
   whyChooseUs: AdminWhyItem[];
   faqs: AdminFaq[];
+  galleryItems: AdminGalleryItem[];
   blogPosts: AdminBlogPost[];
   certificates: Record<string, AdminCertificate[]>;
   lawyers: Record<string, AdminLawyerOverride>;
@@ -126,7 +139,9 @@ export const defaultAdminContent: AdminContent = {
     email: "nuaimrazak.bangi@gmail.com",
     address: "11-2, Jln Puteri 3A/1, Bandar Puteri Bangi, 43000 Kajang, Selangor",
     hours: "Isnin - Jumaat, 09:00 - 18:00",
-    mapHref: "https://maps.google.com/?q=11-2%2C%20Jln%20Puteri%203A%2F1%2C%20Bandar%20Puteri%20Bangi%2C%2043000%20Kajang%2C%20Selangor"
+    mapHref: "https://maps.google.com/?q=11-2%2C%20Jln%20Puteri%203A%2F1%2C%20Bandar%20Puteri%20Bangi%2C%2043000%20Kajang%2C%20Selangor",
+    facebookHref: "https://www.facebook.com/peguamsyarie.nuaimmajemi",
+    tiktokHref: "https://www.tiktok.com/@nuaimrazak"
   },
   hero: {
     eyebrow: "Nuaim Razak & Partners",
@@ -142,6 +157,7 @@ export const defaultAdminContent: AdminContent = {
     about: { eyebrow: "Tentang Kami", title: "Firma Guaman Syarie Yang Dibina Atas Komitmen Membela Hak", description: "Ketahui latar belakang Nuaim Razak & Partners, pengalaman firma di Mahkamah Syariah dan nilai profesional yang membimbing setiap tugasan kami." },
     services: { eyebrow: "Bidang Amalan", title: "Khidmat Guaman Syarie Untuk Isu Keluarga, Harta Islam Dan Jenayah Syariah", description: "Setiap kes memerlukan penelitian fakta, dokumen dan prosedur. Berikut ialah bidang utama yang dikendalikan oleh firma." },
     lawyers: { eyebrow: "Peguam", title: "Pasukan Rakan Kongsi Nuaim Razak & Partners", description: "Kenali kelayakan, pengalaman dan negeri amalan setiap rakan kongsi firma." },
+    gallery: { eyebrow: "Galeri", title: "Sorotan Aktiviti Dan Perkembangan Firma", description: "Ikuti foto terkini aktiviti, program dan perkembangan Nuaim Razak & Partners." },
     articles: { eyebrow: "Artikel", title: "Catatan Blog Dan Rujukan", description: "Himpunan perkongsian berkaitan keluarga, masyarakat, Islam dan isu undang-undang Syariah." },
     contact: { eyebrow: "Hubungi Kami", title: "Tetapkan Temujanji Konsultasi Guaman Syarie", description: "Hubungi kami melalui telefon, WhatsApp, email atau borang pertanyaan. Pihak firma akan menghubungi anda semula mengikut maklumat yang diberikan." },
     appointment: { eyebrow: "Temujanji", title: "Buat Temujanji Konsultasi", description: "Lengkapkan borang ringkas ini supaya pihak firma dapat memahami pertanyaan awal anda sebelum menghubungi semula." },
@@ -174,6 +190,35 @@ export const defaultAdminContent: AdminContent = {
     { question: "Bilakah waktu operasi syarikat?", answer: "Kami beroperasi dari hari Isnin hingga Jumaat, dari jam 9 pagi hingga 6 petang, bergantung kepada jadual temujanji." },
     { question: "Adakah firma guaman anda mengenakan caj konsultasi?", answer: "Sila hubungi firma melalui WhatsApp atau telefon untuk mendapatkan maklumat terkini tentang kadar konsultasi dan kaedah pembayaran." }
   ],
+  galleryItems: [
+    {
+      title: "Rakan Kongsi Firma",
+      category: "Firma",
+      date: "",
+      description: "Nuaim Razak & Partners menyediakan khidmat guaman Syarie secara profesional, telus dan berhemah.",
+      image: "/images/hero-partners-generated-v2.webp",
+      imageAlt: "Rakan kongsi Nuaim Razak & Partners",
+      published: true
+    },
+    {
+      title: "Pasukan Nuaim Razak & Partners",
+      category: "Pasukan",
+      date: "",
+      description: "Pasukan firma yang komited membantu klien memahami dan mengurus proses undang-undang Syariah.",
+      image: "/images/founders.png",
+      imageAlt: "Pasukan Nuaim Razak & Partners",
+      published: true
+    },
+    {
+      title: "Khidmat Guaman Syarie",
+      category: "Firma",
+      date: "",
+      description: "Khidmat nasihat dan guaman Syarie untuk individu dan keluarga.",
+      image: "/images/firm-story-partners-generated.webp",
+      imageAlt: "Rakan kongsi firma Nuaim Razak & Partners",
+      published: true
+    }
+  ],
   blogPosts: [
     { title: "Kita Adalah Penyambung Warisan", category: "Malaysia", date: "28/11/2021", excerpt: "KITA ADALAH PENYAMBUNG WARISAN Nikmat Kemerdekaan Kemerdekaan sebuah negara adalah nikmat terbesar kurniaan Allah SWT...", image: "/images/blog-malaysia.png", href: "/kita-adalah-penyambung-warisan/", slug: "kita-adalah-penyambung-warisan", content: "", published: true },
     { title: "Cerai dan Rujuk Bukannya Perkara Main-Main", category: "Undang-Undang Keluarga", date: "28/11/2021", excerpt: "CERAI DAN RUJUK BUKANNYA PERKARA MAIN-MAIN. Dua tiga minggu ini saya sangat teruja apabila aktiviti hujung minggu...", image: "/images/blog-cerai-rujuk.png", href: "/cerai-dan-rujuk-bukannya-perkara-main-main/", slug: "cerai-dan-rujuk-bukannya-perkara-main-main", content: "", published: true },
@@ -201,6 +246,14 @@ export function normalizeAdminContent(content: Partial<AdminContent>): AdminCont
     },
     whyChooseUs: content.whyChooseUs?.length ? content.whyChooseUs : defaultAdminContent.whyChooseUs,
     faqs: content.faqs?.length ? content.faqs : defaultAdminContent.faqs,
+    galleryItems: (content.galleryItems ?? defaultAdminContent.galleryItems).map((item) => ({
+      ...item,
+      category: item.category || "Umum",
+      date: item.date || "",
+      description: item.description || "",
+      imageAlt: item.imageAlt || item.title,
+      published: item.published ?? true
+    })),
     blogPosts: (content.blogPosts?.length ? content.blogPosts : defaultAdminContent.blogPosts).map((post) => {
       let slug = post.slug || "";
       if (!slug && post.href) {
@@ -224,6 +277,10 @@ export function normalizeAdminContent(content: Partial<AdminContent>): AdminCont
 
 export function getPublishedArticles(content: AdminContent): AdminBlogPost[] {
   return content.blogPosts.filter((post) => post.published && post.slug && post.content.trim());
+}
+
+export function getPublishedGalleryItems(content: AdminContent): AdminGalleryItem[] {
+  return content.galleryItems.filter((item) => item.published && item.image.trim());
 }
 
 export async function getAdminContent(): Promise<AdminContent> {
